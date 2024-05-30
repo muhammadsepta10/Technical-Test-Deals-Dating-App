@@ -1,0 +1,28 @@
+version: '0.1'
+
+services:
+    app:
+        build: .
+        container_name: simaspro-api-container
+        ports:
+            - 9011:9011
+        env_file: .env
+        environment:
+            TZ: Asia/Jakarta
+        restart: always
+        volumes:
+            - simaspro-api-volume:/vol/app
+            - /vol/harmonidigital/public:/vol/public
+            - /vol/harmonidigital/simaspro-service/assets:/vol/app/assets
+        networks:
+            - simaspro-api-networks
+
+volumes:
+    simaspro-api-volume:
+        name: simaspro-api-volume
+
+networks:
+    simaspro-api-networks:
+        name: simaspro-api-networks
+        driver: bridge
+        external: true

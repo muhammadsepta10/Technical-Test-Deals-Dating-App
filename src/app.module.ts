@@ -1,0 +1,62 @@
+import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RequestLogMiddleware } from '@common/middleware/log.middleware';
+import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
+import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
+import { DataSource } from 'typeorm';
+import { LogDBConfigModule } from '@common/config/db/log-db/config.module';
+import { LogDBConfigService } from '@common/config/db/log-db/config.service';
+import { resolve } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { path as appRoot } from "app-root-path"
+import { RequestDbModule } from './db/log-db/entity/request/request.module';
+import { LoggerModule } from '@common/logger/logger.module';
+import { AppConfigModule } from '@common/config/api/config.module';
+import { CommonModule } from '@common/service/common.module';
+import { CacheModule } from './module/cache/cache.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRootAsync({
+      imports: [ProjectDbConfigModule],
+      inject: [ProjectDbConfigService],
+      // Use useFactory, useClass, or useExisting
+      // to configure the DataSourceOptions.
+      useFactory: (config: ProjectDbConfigService) => config.typeORMConfig()
+      ,
+      // dataSource receives the configured DataSourceOptions
+      // and returns a Promise<DataSource>.
+      dataSourceFactory: async (options) => {
+        const dataSource = await new DataSource(options).initialize();
+        return dataSource;
+      },
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [LogDBConfigModule],
+      inject: [LogDBConfigService],
+      useFactory: ((config: LogDBConfigService) => config.typeORMConfig()),
+      dataSourceFactory: async (options) => {
+        const dataSource = await new DataSource(options).initialize();
+        return dataSource;
+      }
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: resolve(`${appRoot}/../public`),
+    }),
+    RequestDbModule,
+    LoggerModule,
+    AppConfigModule,
+    CommonModule,
+    CacheModule
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLogMiddleware).forRoutes('*');
+  }
+}
