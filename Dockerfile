@@ -39,7 +39,7 @@ RUN echo "NODE_ENV is set to: $NODE_ENV"
 RUN npm ci --omit=dev
 
 # Expose Port Service
-EXPOSE 5010
+EXPOSE 9011
 
 # Execute command
 CMD ["npm", "start"]
