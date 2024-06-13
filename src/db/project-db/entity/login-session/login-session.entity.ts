@@ -2,36 +2,30 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { MasterMedia } from '../master-media/master-media.entity';
 import { User } from '../user/user.entity';
 
-export enum TypeData {
-  STRING = 'string',
-  NUMBER = 'number',
-  OBJECT = 'object',
-  ARRAY = 'array'
-}
-
-@Entity('general_parameter')
-export class GeneralParameter {
+@Entity('login_session')
+export class LoginSession {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
-  uuid: string;
+  sessionId: string;
 
-  @Column({ type: 'varchar', length: 255, default: null, unique: true, nullable: true })
-  name: string;
-
-  @Column({ type: 'varchar', length: 255, default: '', nullable: true })
-  value: string;
-
-  @Column({ type: 'enum', enum: TypeData, default: TypeData.STRING })
-  type: TypeData;
+  @Index()
+  @Column({ type: 'varchar', length: 100 })
+  expired: string;
 
   @Column({ type: 'smallint', width: 3, default: 0, comment: '0->inactive, 1->active', nullable: true })
   status: number;
 
   @Column({ type: 'smallint', width: 2, default: 0, comment: '0->active, 1->inactive', nullable: true })
   is_deleted: number;
+
+  @ManyToOne(() => User, user => user.id)
+  user: User;
+  @Index()
+  @Column({ default: null, nullable: true })
+  userId: number;
 
   @ManyToOne(() => MasterMedia, media => media.id)
   masterMedia: MasterMedia;
