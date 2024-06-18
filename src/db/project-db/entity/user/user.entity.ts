@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserDevice } from '../user_device/user_device.entity';
 import { UserAccess } from '../user-access/user-access.entity';
+import { UserJournalist } from '../user-journalist/user-journalist.entity';
 
 @Entity('user')
 export class User {
@@ -25,6 +26,9 @@ export class User {
 
   @Column({ default: 1, type: 'varchar', length: 2, comment: '1-> active, 2-> inactive' })
   status: number;
+
+  @OneToMany(() => UserJournalist, journalist => journalist.user)
+  UserJournalist: UserJournalist[];
 
   @OneToMany(() => UserDevice, userDevice => userDevice.user)
   userDevices: UserDevice[];
