@@ -1,11 +1,24 @@
-import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from 'typeorm';
 import { MasterBank } from '../master-bank/master-bank.entity';
 import { User } from '../user/user.entity';
+import { UserJournalistDoc } from '../user-journalist-doc/user-journalist-doc.entity';
 
 @Entity('user_journalist')
 export class UserJournalist {
   @PrimaryGeneratedColumn('increment')
   id: number;
+
+  @OneToMany(() => UserJournalistDoc, userJournalistDoc => userJournalistDoc.userJournalist)
+  UserJournalistDoc: UserJournalistDoc[];
 
   @ManyToOne(() => User, user => user.id)
   user: User;
@@ -22,7 +35,7 @@ export class UserJournalist {
   @Column({ type: 'varchar', length: 255, nullable: false })
   whatsapp_no: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   email: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
@@ -63,11 +76,8 @@ export class UserJournalist {
   @Column({ type: 'varchar', length: 150, nullable: true })
   podcast_link: string;
 
-  @Column({ type: 'varchar', length: 8, nullable: true, comment: 'auto generated on approved' })
+  @Column({ type: 'varchar', length: 8, unique: true, nullable: true, comment: 'auto generated on approved' })
   journalist_id: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  certificate_doc: string;
 
   @CreateDateColumn({
     type: 'timestamp',
