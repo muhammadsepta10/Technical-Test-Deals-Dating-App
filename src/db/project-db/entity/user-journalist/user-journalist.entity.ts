@@ -29,6 +29,15 @@ export class UserJournalist {
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uuid: string;
 
+  @Column({
+    type: 'smallint',
+    width: 3,
+    default: 0,
+    comment: '0->inactive, 2->on verif, 1->active',
+    nullable: true
+  })
+  status: number;
+
   @Column({ type: 'varchar', length: 255, nullable: false })
   media_name: string;
 
