@@ -5,6 +5,7 @@ import { CommonService } from '@common/service/common.service';
 import { AppConfigService } from '../api/config.service';
 import { ConfigService } from '@nestjs/config';
 import { resolve } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
 const configService = new ConfigService();
 const appConfigService = new AppConfigService(configService);
@@ -14,7 +15,11 @@ export const multerOptions = dest => {
   return {
     storage: diskStorage({
       destination: (req: any, file: any, cb: any) => {
-        cb(null, resolve(`${appRoot}/../public/${dest}/`));
+        const dir = `${appRoot}/../public/${dest}/`;
+        if (!existsSync(dir)) {
+          mkdirSync(dir, { recursive: true });
+        }
+        cb(null, resolve(dir));
       },
       filename: async (req, file, cb) => {
         const uniqueName = await commonService.randString(10, '1234567890POIUYTREWQASDFGHJKLMNBVCXZ', '');
