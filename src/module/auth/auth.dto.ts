@@ -36,7 +36,7 @@ export class DeviceDto {
 }
 export class LoginDTO {
   @ApiProperty()
-  journalist_id: string;
+  username: string;
   @ApiProperty()
   password: string;
   @ApiProperty()

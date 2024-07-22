@@ -5,9 +5,9 @@ import { DeviceDto, LoginDTO, RegisterDTO, ReqOtpDTO, ValidateOtpDTO } from './a
 export class LoginPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
     return Joi.object<LoginDTO>({
-      journalist_id: Joi.string().trim().lowercase().required(),
+      username: Joi.string().trim().lowercase().required(),
       media: Joi.string().optional().default('400'),
-      password: Joi.string().trim().min(8).required(),
+      password: Joi.string().trim().required(),
       version: Joi.number().optional().allow(''),
       device: Joi.object<DeviceDto>({
         imei: Joi.string().trim().optional().messages({
