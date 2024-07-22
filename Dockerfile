@@ -26,7 +26,7 @@ WORKDIR /vol/app
 COPY --from=builder /vol/app/package*.json ./
 COPY --from=builder /vol/app/dist ./dist
 COPY --from=builder /vol/app/.env ./.env
-COPY --from=builder /vol/app/assets ./assets
+# COPY --from=builder /vol/app/assets ./assets
 
 # Set NODE_ENV to development if not already set (useful for development)
 ARG NODE_ENV=development

@@ -13,7 +13,7 @@ services:
         volumes:
             - simaspro-api-volume:/vol/app
             - /vol/harmonidigital/public:/vol/public
-            - /vol/harmonidigital/simaspro-service/assets:/vol/app/assets
+            - /vol/harmonidigital/simaspro-api/assets:/vol/app/assets
         networks:
             - simaspro-api-networks
 
