@@ -3,14 +3,17 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
 import { MasterBank } from '../master-bank/master-bank.entity';
 import { User } from '../user/user.entity';
 import { UserJournalistDoc } from '../user-journalist-doc/user-journalist-doc.entity';
+import { MasterInvalidReason } from '../master-invalid-reason/master-invalid-reason.entity';
 
 @Entity('user_journalist')
 export class UserJournalist {
@@ -20,10 +23,21 @@ export class UserJournalist {
   @OneToMany(() => UserJournalistDoc, userJournalistDoc => userJournalistDoc.userJournalist)
   UserJournalistDoc: UserJournalistDoc[];
 
-  @ManyToOne(() => User, user => user.id)
+  @OneToOne(() => User, user => user.id)
+  @JoinColumn()
   user: User;
   @Column({ type: 'int', nullable: true, default: null })
   userId: number;
+
+  @ManyToOne(() => User, user => user.id)
+  verifiedBy: User;
+  @Column({ default: null, nullable: true })
+  verifiedById: number;
+
+  @ManyToOne(() => User, user => user.id)
+  approvedBy: User;
+  @Column({ default: null, nullable: true })
+  approvedById: number;
 
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
@@ -41,7 +55,7 @@ export class UserJournalist {
   @Column({ type: 'varchar', length: 255, nullable: false })
   media_name: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   whatsapp_no: string;
 
   @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
@@ -55,13 +69,18 @@ export class UserJournalist {
   @Column({ default: null, nullable: true })
   masterBankId: number;
 
-  @Column({ type: 'int', width: 20, nullable: false })
+  @ManyToOne(() => MasterInvalidReason, invalidReason => invalidReason.id)
+  masterInvalidReason: MasterInvalidReason;
+  @Column({ default: null, nullable: true })
+  masterInvalidReasonId: number;
+
+  @Column({ type: 'varchar', length: 20, nullable: false })
   account_no: string;
 
-  @Column({ type: 'int', width: 30, nullable: false })
+  @Column({ type: 'varchar', length: 30, nullable: false })
   pers_card_no: string;
 
-  @Column({ type: 'int', width: 16, nullable: true })
+  @Column({ type: 'varchar', length: 16, nullable: true })
   npwp: string;
 
   @Column({ type: 'varchar', length: 150, nullable: true })
@@ -100,4 +119,10 @@ export class UserJournalist {
     onUpdate: 'CURRENT_TIMESTAMP(6)'
   })
   updated_at: string;
+
+  @Column({ type: 'timestamp', default: null, nullable: true })
+  verified_at: string;
+
+  @Column({ type: 'timestamp', default: null, nullable: true })
+  approved_at: string;
 }
