@@ -1,19 +1,22 @@
 import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
 import { CommonService } from '@common/service/common.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MasterAccessRepository } from 'src/db/project-db/entity/master-access/master-access.repository';
 import { MasterAppRepository } from 'src/db/project-db/entity/master-app/master-app.repository';
 import { UserAccess } from 'src/db/project-db/entity/user-access/user-access.entity';
 import { UserAccessRepository } from 'src/db/project-db/entity/user-access/user-access.repository';
 import { UserRepository } from 'src/db/project-db/entity/user/user.repository';
+import { CreateUserDTO } from './user.dto';
+import { AppConfigService } from '@common/config/api/config.service';
 // import {CreateUserDTO, UpdatePasswordDTO} from "src/dto/user.dto";
 
 @Injectable()
 export class UserService {
   constructor(
     private commonService: CommonService,
-    private projectDbConfigService: ProjectDbConfigService
+    private projectDbConfigService: ProjectDbConfigService,
+    private appConfigService: AppConfigService
   ) {}
   @InjectRepository(UserRepository)
   private userRepository: UserRepository;
@@ -27,11 +30,60 @@ export class UserService {
   @InjectRepository(MasterAppRepository)
   private masterAppRepository: MasterAppRepository;
 
+  async createUser(param: CreateUserDTO, userId, file: Express.Multer.File) {
+    const dataSource = await this.projectDbConfigService.dbConnection();
+    const queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const urlFile = file ? `'${this.appConfigService.BASE_URL + '/journalist_doc/' + file.filename}'` : '';
+      const { accessId, appId, name, password, username } = param;
+      const user = await this.userRepository.findUserLogin(username);
+      if (!user) {
+        throw new BadRequestException('User Alaready Exist');
+      }
+      const masterAccess = await this.masterAccessRepository.findOne({ where: { id: accessId }, select: ['id'] });
+      if (!masterAccess) {
+        throw new BadRequestException('Invalid Access');
+      }
+      const masterApp = await this.masterAppRepository.findOne({ where: { id: appId }, select: ['id'] });
+      if (!masterApp) {
+        throw new BadRequestException('Invalid App');
+      }
+      const hashPassword = await this.commonService.bcrpytSign(password);
+      const createUser = await this.userRepository.insert({
+        name,
+        password: hashPassword,
+        username,
+        photo: urlFile,
+        status: 1
+      });
+      await this.userAccessRepository.insert({
+        userId: createUser.identifiers[0].id,
+        masterAppId: appId,
+        masterAccessId: accessId,
+        createdById: userId,
+        status: 1
+      });
+      await queryRunner.commitTransaction();
+      return { message: 'create user success' };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (!error?.response || !error?.status) {
+        throw new InternalServerErrorException(error);
+      }
+      throw new HttpException(error?.response, error?.status);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async getMe(userId: number, appId: number) {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .innerJoin('user.userAccess', 'ua')
       .innerJoin('ua.masterAccess', 'access')
+      .leftJoin('user.UserJournalist', 'UserJournalist')
       .select('user.username', 'username')
       .addSelect('user.name', 'name')
       .addSelect('user.photo', 'photo')
@@ -62,31 +114,6 @@ export class UserService {
     return userRfct;
   }
 
-  // async changePassword(param: UpdatePasswordDTO, userId: number) {
-  //     const dataSource = await this.projectDbConfigService.dbConnection();
-  //     const queryRunner = dataSource.createQueryRunner();
-  //     await queryRunner.connect();
-  //     await queryRunner.startTransaction();
-  //     try {
-  //         let {password} = param
-  //         const hashPassword = await this.commonService.bcrpytSign(password)
-  //         const updatePass = await queryRunner.manager.update(User, {id: userId}, {password: hashPassword})
-  //         if (updatePass.affected < 1) {
-  //             throw new BadRequestException("Invalid Change Password")
-  //         }
-  //         await queryRunner.commitTransaction()
-  //         return "Success Change Password"
-  //     } catch (error) {
-  //         await queryRunner.rollbackTransaction();
-  //         if (!error?.response || !error?.status) {
-  //             throw new InternalServerErrorException(error);
-  //         }
-  //         throw new HttpException(error?.response, error?.status);
-  //     } finally {
-  //         await queryRunner.release()
-  //     }
-  // }
-
   async getRole(userId: number, appId: number): Promise<{ code: string; name: string; id: number }> {
     const access = await this.masterAccessRepository
       .createQueryBuilder('access')
@@ -112,49 +139,4 @@ export class UserService {
       .getRawMany();
     return users;
   }
-
-  // async createUser(param: CreateUserDTO, user) {
-  //     const dataSource = await this.projectDbConfigService.dbConnection();
-  //     const queryRunner = dataSource.createQueryRunner();
-  //     await queryRunner.connect();
-  //     await queryRunner.startTransaction();
-  //     try {
-  //         let {accessId, email, name, password, appId: apps} = param
-  //         const hashPassword = await this.commonService.bcrpytSign(password)
-  //         let userCreated = await this.userRepository.findOne({where: {username: email}, select: ["id"]})
-  //         const access = await this.masterAccessRepository.findOne({where: {uuid: accessId}, select: ['id']})
-  //         if (userCreated) {
-  //             throw new BadRequestException("Email Already Use")
-  //         }
-  //         userCreated = await this.userRepository.insert({
-  //             name,
-  //             username: email,
-  //             password: hashPassword
-  //         }).then(v => v.raw[0])
-  //         for (let index = 0; index < apps.length; index++) {
-  //             const appId = apps[index];
-  //             const app = await this.masterAppRepository.findOne({where: {id: appId}, select: ["id"]})
-  //             if (!app) {
-  //                 throw new BadRequestException("Invalid App")
-  //             }
-  //             await queryRunner.manager.insert(UserAccess, {
-  //                 masterAccessId: access.id,
-  //                 userId: userCreated.id,
-  //                 masterAppId: app.id,
-  //                 status: 1,
-  //                 createdById: user
-  //             })
-  //         }
-  //         await queryRunner.commitTransaction()
-  //         return userCreated
-  //     } catch (error) {
-  //         await queryRunner.rollbackTransaction();
-  //         if (!error?.response || !error?.status) {
-  //             throw new InternalServerErrorException(error);
-  //         }
-  //         throw new HttpException(error?.response, error?.status);
-  //     } finally {
-  //         await queryRunner.release()
-  //     }
-  // }
 }
