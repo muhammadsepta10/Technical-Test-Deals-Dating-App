@@ -7,8 +7,10 @@ WORKDIR /vol/app
 # Copy only *.json to leverage docker caching
 COPY package*.json ./
 
+RUN npm i -g husky
+
 # Install dependencies
-RUN npm install --ignore-scripts
+RUN npm install
 
 # Copy all file to workdir
 COPY . .
@@ -35,8 +37,10 @@ ENV NODE_ENV=${NODE_ENV}
 # Log the current NODE_ENV to troubleshoot
 RUN echo "NODE_ENV is set to: $NODE_ENV"
 
+RUN npm i -g husky
+
 # Install dependencies
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
 # Expose Port Service
 EXPOSE 9011
