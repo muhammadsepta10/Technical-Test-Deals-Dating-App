@@ -36,7 +36,6 @@ export class AuthService {
       throw new BadRequestException('User tidak terdaftar');
     }
     const { status, id, hashPassword, accessId, appId } = user;
-    console.log('status', status);
     if (status != 1) {
       throw new BadRequestException('User Tidak Aktif');
     }
@@ -48,7 +47,7 @@ export class AuthService {
     return { token, message: 'Succes login' };
   }
 
-  private async _genToken(userId: number, accessId?: string, appId?: number, masterMediaId?: number) {
+  private async _genToken(userId: number, accessId?: number, appId?: number, masterMediaId?: number) {
     masterMediaId = +masterMediaId || null;
     const { COOKIES_EXPIRATION_DAY } = await this.commonService.generalParameter();
     const expiredDate = dayjs()
@@ -207,11 +206,6 @@ export class AuthService {
         { email, status: In([0, 1, 2]) }
       ]
     });
-    if (checkUserJournalist) {
-      if (email === checkUserJournalist.email) {
-        throw new BadRequestException('Email Already Exist');
-      }
-    }
     return checkUserJournalist?.id;
   }
 }
