@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MasterService } from './master.service';
 import { AuthGuard } from '@common/guards/auth.guard';
 import { RoleGuard } from '@common/guards/role.guard';
@@ -6,8 +6,14 @@ import { Access } from '@common/decorators/param.access.decorator';
 import { Roles } from '@common/decorators/role.decorator';
 import { ListReasonDTO } from './master.dto';
 import { ListReasonPipe } from './master.pipe';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { TransformInterceptor } from '@common/interceptor/transform.interceptor';
 
-@Controller('master')
+@Controller('/api/master')
+@ApiTags('Master')
+@ApiSecurity('auth')
+@ApiSecurity('appAuth')
+@UseInterceptors(TransformInterceptor)
 export class MasterController {
   constructor(private masterService: MasterService) {}
 
