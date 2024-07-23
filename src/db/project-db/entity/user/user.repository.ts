@@ -10,7 +10,7 @@ export class UserRepository extends Repository<User> {
   }
 
   async findUserLogin(username: string): Promise<IFindUserLogin> {
-    const syntax = `SELECT A.id, "password" as "hashPassword", A.status, C.id as "appId", B.uuid AS "accessId" FROM "user" A
+    const syntax = `SELECT A.id, "password" as "hashPassword", A.status, C.id as "appId", B.id AS "accessId" FROM "user" A
       JOIN user_access B ON A.id = B."userId"
       JOIN master_app C ON C.id = B."masterAppId"
       WHERE A.username = $1`;

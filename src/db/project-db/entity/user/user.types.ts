@@ -3,5 +3,5 @@ export interface IFindUserLogin {
   hashPassword: string;
   status: number;
   appId: number;
-  accessId: string;
+  accessId: number;
 }
