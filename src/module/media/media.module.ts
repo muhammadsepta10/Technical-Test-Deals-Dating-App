@@ -9,6 +9,8 @@ import { UserDbModule } from 'src/db/project-db/entity/user/user.module';
 import { UserAccessDbModule } from 'src/db/project-db/entity/user-access/user-access.module';
 import { UserJournalistDocModule } from 'src/db/project-db/entity/user-journalist-doc/user-journalist-doc.module';
 import { MasterInvalidReasonModule } from 'src/db/project-db/entity/master-invalid-reason/master-invalid-reason.module';
+import { JournalistVerificationCodeDbModule } from 'src/db/project-db/entity/journalist-verification-code/journalist-verification-code.module';
+import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
 
 @Module({
   imports: [
@@ -19,7 +21,9 @@ import { MasterInvalidReasonModule } from 'src/db/project-db/entity/master-inval
     UserDbModule,
     UserAccessDbModule,
     UserJournalistDocModule,
-    MasterInvalidReasonModule
+    MasterInvalidReasonModule,
+    JournalistVerificationCodeDbModule,
+    ProjectDbConfigModule
   ],
   providers: [MediaService],
   controllers: [MediaController]
