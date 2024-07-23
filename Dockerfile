@@ -8,7 +8,7 @@ WORKDIR /vol/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copy all file to workdir
 COPY . .
@@ -36,7 +36,7 @@ ENV NODE_ENV=${NODE_ENV}
 RUN echo "NODE_ENV is set to: $NODE_ENV"
 
 # Install dependencies
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 # Expose Port Service
 EXPOSE 9011
