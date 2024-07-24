@@ -57,11 +57,11 @@ export class SendMailProcessor {
         }
       );
       await queryRunner.manager.insert(Notification, {
-        userId,
+        userId: userId || null,
         content: text || '',
         html,
         title: subject || '',
-        createdById: userId,
+        createdById: userId || null,
         status: 1
       });
       await queryRunner.commitTransaction();

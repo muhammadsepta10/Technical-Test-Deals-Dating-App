@@ -19,6 +19,7 @@ import { CommonModule } from '@common/service/common.module';
     ProjectDbConfigModule,
     CommonModule
   ],
-  controllers: [MailerController]
+  controllers: [MailerController],
+  exports: [MailerService]
 })
 export class MailerModule {}

@@ -39,11 +39,14 @@ export class MailerService {
   }
 
   async sendMail(param: SendMailDTO) {
-    const { email, subject, text, userId } = param;
-    let { html } = param;
-    const existFile = existsSync(`${appRootPath}/assets/${html}`);
-    if (existFile) {
-      html = readFileSync(`${appRootPath}/assets/${html}`, { encoding: 'utf8' });
+    const { email, subject, userId } = param;
+    const text = param?.text || '';
+    let html = param?.html || '';
+    if (html) {
+      const existFile = existsSync(`${appRootPath}/assets/${html}`);
+      if (existFile) {
+        html = readFileSync(`${appRootPath}/assets/${html}`, { encoding: 'utf8' });
+      }
     }
     await this.sendMailQueue.add(
       {
