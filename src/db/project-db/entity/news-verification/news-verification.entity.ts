@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../user/user.entity';
 import { MasterNewsCategory } from '../master-news-category/master-news-category.entity';
+import { MasterInvalidReason } from '../master-invalid-reason/master-invalid-reason.entity';
 
 @Entity('news_verification')
 export class NewsVerification {
@@ -21,6 +22,11 @@ export class NewsVerification {
   masterNewsCategory: MasterNewsCategory;
   @Column({ default: null, nullable: true })
   masterNewsCategoryId: number;
+
+  @ManyToOne(() => MasterInvalidReason, invalidReason => invalidReason.id)
+  masterInvalidReason: MasterInvalidReason;
+  @Column({ default: null, nullable: true })
+  masterInvalidReasonId: number;
 
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
