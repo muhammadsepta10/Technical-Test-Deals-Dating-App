@@ -124,6 +124,7 @@ export class ApprovedSimaspro {
       await queryRunner.release();
     }
   }
+
   private async _sendMail(params: string[], status: number, email: string, userId: number) {
     const scriptObj = await this.masterService
       .script()
@@ -138,11 +139,12 @@ export class ApprovedSimaspro {
       text: scriptObj.body
     });
   }
+
   private async _generateVerificationCode(journalistId: number, cnt: number, queryRunner: QueryRunner) {
     let generated = 0;
     let verificationCodes = '';
     while (generated < cnt) {
-      const code = await this.commonService.randString(10, '34679QWERTYUPADFGHJKLXCVNM', '');
+      const code = (await this.commonService.randString(10, '34679QWERTYUPADFGHJKLXCVNM', '')).toUpperCase();
       const check = await queryRunner.manager.findOne(JournalistVerificationCode, {
         where: { verification_code: code },
         select: ['id']

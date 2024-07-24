@@ -17,6 +17,9 @@ import { BullModule } from '@nestjs/bull';
 import { ApprovedSimaspro } from './media.proccess';
 import { NewsVerificationModule } from 'src/db/project-db/entity/news-verification/news-verification.module';
 import { UserJournalistHistoryModule } from 'src/db/project-db/entity/user-journalist-history/user-journalist-history.module';
+import { AppConfigModule } from '@common/config/api/config.module';
+import { MasterNewsCategoryModule } from 'src/db/project-db/entity/master-news-category/master-news-category.module';
+import { NewsVerificationDocModule } from 'src/db/project-db/entity/news-verification-doc/news-verification-doc.module';
 
 @Module({
   imports: [
@@ -36,7 +39,10 @@ import { UserJournalistHistoryModule } from 'src/db/project-db/entity/user-journ
       name: 'approved-simaspro'
     }),
     NewsVerificationModule,
-    UserJournalistHistoryModule
+    UserJournalistHistoryModule,
+    AppConfigModule,
+    MasterNewsCategoryModule,
+    NewsVerificationDocModule
   ],
   providers: [MediaService, ApprovedSimaspro],
   controllers: [MediaController]

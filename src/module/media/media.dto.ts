@@ -20,6 +20,30 @@ export class ApproveMediaDTO {
   reasonId: number;
 }
 
+export class ApproveNewsDTO {
+  @ApiProperty()
+  newsId: string;
+  @ApiProperty({ description: '1->approved, 2->rejected' })
+  status: number;
+  @ApiProperty({ required: false })
+  reasonId: number;
+}
+
+export class SubmitNewsDTO {
+  @ApiProperty()
+  verificationNo: string;
+  @ApiProperty()
+  categoryId: number;
+  @ApiProperty()
+  title: string;
+  @ApiProperty()
+  desc: string;
+  @ApiProperty()
+  url: string;
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'Files' })
+  files: Express.Multer.File[];
+}
+
 export class ProcessApprovedMediaDTO {
   status: number;
   mediaName: string;
