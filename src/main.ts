@@ -7,9 +7,9 @@ import helmet from 'helmet';
 import { AllExceptionsFilter } from './common/filter/exception.filter';
 import { LoggingInterceptor } from '@common/interceptor/log.interceptor';
 import { LoggerService } from '@common/logger/logger.service';
-// import {BullMonitorExpress} from '@bull-monitor/express';
-// import {BullAdapter} from '@bull-monitor/root/dist/bull-adapter';
-// import {Queue} from 'bull';
+import { Queue } from 'bull';
+import { BullMonitorExpress } from '@bull-monitor/express';
+import { BullAdapter } from '@bull-monitor/root/dist/bull-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -39,28 +39,25 @@ async function bootstrap() {
   }
 
   // BULL MONITOR CONFIG
-  // let adapters: BullAdapter[] = []
-  // let queues = ["send_mail", "push_notification"]
-  // for (let index = 0; index < queues.length; index++) {
-  //   const queue = queues[index]
-  //   const adapter = new BullAdapter(app.get<Queue>(`BullQueue_${queue}`))
-  //   adapters.push(adapter)
-  // }
+  const adapters: BullAdapter[] = [];
+  const queues = ['send-mail-simaspro'];
+  for (let index = 0; index < queues.length; index++) {
+    const queue = queues[index];
+    const adapter = new BullAdapter(app.get<Queue>(`BullQueue_${queue}`));
+    adapters.push(adapter);
+  }
 
-  // const monitor = new BullMonitorExpress({
-  //   queues: adapters,
-  //   gqlIntrospection: true,
-  //   metrics: {
-  //     collectInterval: {hours: 1},
-  //     maxMetrics: 100,
-  //   },
-  // });
-  // await monitor.init();
+  const monitor = new BullMonitorExpress({
+    queues: adapters,
+    gqlIntrospection: true,
+    metrics: {
+      collectInterval: { hours: 1 },
+      maxMetrics: 100
+    }
+  });
+  await monitor.init();
 
-  // app.use(
-  // `/admin/queues`,
-  // monitor.router
-  // )
+  app.use(`/admin/queues`, monitor.router);
 
   // USE GENERAL MIDDLEWARE
   app.use(express.json({ limit: '500mb' }));
