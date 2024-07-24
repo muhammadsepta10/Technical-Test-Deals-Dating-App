@@ -13,6 +13,8 @@ import { JournalistVerificationCode } from 'src/db/project-db/entity/journalist-
 import { QueryRunner } from 'typeorm';
 import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
 import { ProcessApprovedMediaDTO } from './media.dto';
+import { UserJournalistHistoryRepository } from 'src/db/project-db/entity/user-journalist-history/user-journalist-history.repository';
+import * as dayJs from 'dayjs';
 
 @Processor('approved-simaspro')
 export class ApprovedSimaspro {
@@ -24,6 +26,8 @@ export class ApprovedSimaspro {
   ) {}
   @InjectRepository(UserJournalistRepository) private userJournalistRepository: UserJournalistRepository;
   @InjectRepository(UserJournalistDocRepository) private userJournalistDocRepository: UserJournalistDocRepository;
+  @InjectRepository(UserJournalistHistoryRepository)
+  private userJournalistHistoryRepository: UserJournalistHistoryRepository;
   @InjectRepository(UserRepository) private userRepository: UserRepository;
   @InjectRepository(UserAccessRepository) private userAccessRepository: UserAccessRepository;
   @InjectRepository(JournalistVerificationCodeRepository)
@@ -102,9 +106,18 @@ export class ApprovedSimaspro {
         // send email
         await this._sendMail([reasonName], 2, userJournalEmail, 0);
       }
+      await this.userJournalistHistoryRepository
+        .createQueryBuilder()
+        .insert()
+        .values({
+          approved_at: dayJs().format('YYYY-MM-DD HH:mm:ss'),
+          approvedById: userId,
+          createdById: userId,
+          status,
+          userJournalistId: userJournalId
+        });
       await queryRunner.commitTransaction();
     } catch (error) {
-      console.log('error', error);
       await queryRunner.rollbackTransaction();
       throw new Error(error.stack);
     } finally {

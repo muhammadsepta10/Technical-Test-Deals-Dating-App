@@ -15,6 +15,8 @@ import { MailerModule } from '../mailer/mailer.module';
 import { MasterModule } from '../master/master.module';
 import { BullModule } from '@nestjs/bull';
 import { ApprovedSimaspro } from './media.proccess';
+import { NewsVerificationModule } from 'src/db/project-db/entity/news-verification/news-verification.module';
+import { UserJournalistHistoryModule } from 'src/db/project-db/entity/user-journalist-history/user-journalist-history.module';
 
 @Module({
   imports: [
@@ -32,7 +34,9 @@ import { ApprovedSimaspro } from './media.proccess';
     MasterModule,
     BullModule.registerQueue({
       name: 'approved-simaspro'
-    })
+    }),
+    NewsVerificationModule,
+    UserJournalistHistoryModule
   ],
   providers: [MediaService, ApprovedSimaspro],
   controllers: [MediaController]
