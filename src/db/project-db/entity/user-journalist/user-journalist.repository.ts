@@ -21,7 +21,7 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
 
   async listJournalist(param: ListJournalistParamDTO) {
     const { limit, search, skip, status } = param;
-    const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'On Verif' WHEN status = 2 THEN 'Verified' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId" FROM user_journalist WHERE 1=1${this._whereStatus(status)}${this._whereKeys(search)} LIMIT ${limit} OFFSET ${skip}`;
+    const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'On Verif' WHEN status = 2 THEN 'Verified' WHEN status = 3 THEN 'Rejected' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId" FROM user_journalist WHERE 1=1${this._whereStatus(status)}${this._whereKeys(search)} LIMIT ${limit} OFFSET ${skip}`;
     return this.query(syntax, []);
   }
 
