@@ -26,7 +26,9 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
   }
 
   async detail(id: string) {
-    const syntax = `SELECT user_journalist.media_name,
+    const syntax = `SELECT 
+      user_journalist.uuid id,
+      user_journalist.media_name,
       user_journalist.whatsapp_no,
       user_journalist.email,
       user_journalist.status,
