@@ -7,7 +7,7 @@ import { MasterBankRepository } from 'src/db/project-db/entity/master-bank/maste
 import { MasterMediaRepository } from 'src/db/project-db/entity/master-media/master-media.repository';
 import { MasterNewsCategoryRepository } from 'src/db/project-db/entity/master-news-category/master-news-category.repository';
 import { MasterInvalidReasonRepository } from 'src/db/project-db/entity/master-invalid-reason/master-invalid-reason.repository';
-import { ListReasonDTO } from './master.dto';
+import { ListReasonDTO, MasterScriptDTO } from './master.dto';
 import { MoreThan } from 'typeorm';
 import { MasterScriptRepository } from 'src/db/project-db/entity/master-script/master-script.repository';
 
@@ -62,7 +62,7 @@ export class MasterService {
     return menu;
   }
 
-  async script() {
+  async script(): Promise<MasterScriptDTO> {
     let data = {};
     const cacheKey = 'scriptCache';
     data = await this.cacheService.get(cacheKey).then(v => {
