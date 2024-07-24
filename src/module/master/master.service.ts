@@ -9,6 +9,7 @@ import { MasterNewsCategoryRepository } from 'src/db/project-db/entity/master-ne
 import { MasterInvalidReasonRepository } from 'src/db/project-db/entity/master-invalid-reason/master-invalid-reason.repository';
 import { ListReasonDTO } from './master.dto';
 import { MoreThan } from 'typeorm';
+import { MasterScriptRepository } from 'src/db/project-db/entity/master-script/master-script.repository';
 
 @Injectable()
 export class MasterService {
@@ -20,6 +21,7 @@ export class MasterService {
   @InjectRepository(MasterMediaRepository) private masterMediaRepository: MasterMediaRepository;
   @InjectRepository(MasterNewsCategoryRepository) private masterNewsCategoryRepository: MasterNewsCategoryRepository;
   @InjectRepository(MasterInvalidReasonRepository) private masterInvalidReasonRepository: MasterInvalidReasonRepository;
+  @InjectRepository(MasterScriptRepository) private masterScriptRepository: MasterScriptRepository;
 
   async listMenu(accessId: number) {
     let menu = [];
@@ -58,6 +60,30 @@ export class MasterService {
       await this.cacheService.set(cacheKey, JSON.stringify(menu), menu?.length < 1 ? 1 : 3600);
     }
     return menu;
+  }
+
+  async script() {
+    let data = {};
+    const cacheKey = 'scriptCache';
+    data = await this.cacheService.get(cacheKey).then(v => {
+      return !v ? {} : JSON.parse(v);
+    });
+    if (Object.keys(data).length === 0) {
+      const arrData = await this.masterScriptRepository
+        .createQueryBuilder('script')
+        .where('script.status = 1')
+        .select(['id', 'name', 'banner', 'title', 'body'])
+        .getRawMany();
+      arrData.map(v => {
+        data[v.name] = {
+          title: v.title,
+          banner: v.banner,
+          body: v.body
+        };
+      });
+      await this.cacheService.set(cacheKey, JSON.stringify(data), Object.keys(data).length === 0 ? 1 : 3600);
+    }
+    return data;
   }
 
   private _buildMenuTree(menuItems, header = 0) {

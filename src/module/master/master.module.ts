@@ -12,6 +12,7 @@ import { CommonModule } from '@common/service/common.module';
 import { UserModule } from '../user/user.module';
 import { LoginSessionDbModule } from 'src/db/project-db/entity/login-session/login-session.module';
 import { MasterInvalidReasonModule } from 'src/db/project-db/entity/master-invalid-reason/master-invalid-reason.module';
+import { MasterScriptDbModule } from 'src/db/project-db/entity/master-script/master-script.module';
 
 @Module({
   providers: [MasterService],
@@ -27,7 +28,9 @@ import { MasterInvalidReasonModule } from 'src/db/project-db/entity/master-inval
     CommonModule,
     UserModule,
     LoginSessionDbModule,
-    MasterInvalidReasonModule
-  ]
+    MasterInvalidReasonModule,
+    MasterScriptDbModule
+  ],
+  exports: [MasterService]
 })
 export class MasterModule {}
