@@ -17,11 +17,11 @@ export class ApproveMediaPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
     return Joi.object<ApproveMediaDTO>({
       mediaId: Joi.string().uuid().required(),
-      status: Joi.number().equal([1, 2]).required(),
+      status: Joi.number().equal(1, 2).required(),
       reasonId: Joi.when('status', {
         is: 2,
-        then: Joi.number().required(),
-        otherwise: Joi.forbidden()
+        then: Joi.number().greater(0).required(),
+        otherwise: Joi.allow(0).optional()
       })
     });
   }

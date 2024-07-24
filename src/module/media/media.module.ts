@@ -11,6 +11,10 @@ import { UserJournalistDocModule } from 'src/db/project-db/entity/user-journalis
 import { MasterInvalidReasonModule } from 'src/db/project-db/entity/master-invalid-reason/master-invalid-reason.module';
 import { JournalistVerificationCodeDbModule } from 'src/db/project-db/entity/journalist-verification-code/journalist-verification-code.module';
 import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
+import { MailerModule } from '../mailer/mailer.module';
+import { MasterModule } from '../master/master.module';
+import { BullModule } from '@nestjs/bull';
+import { ApprovedSimaspro } from './media.proccess';
 
 @Module({
   imports: [
@@ -23,9 +27,14 @@ import { ProjectDbConfigModule } from '@common/config/db/project-db/config.modul
     UserJournalistDocModule,
     MasterInvalidReasonModule,
     JournalistVerificationCodeDbModule,
-    ProjectDbConfigModule
+    ProjectDbConfigModule,
+    MailerModule,
+    MasterModule,
+    BullModule.registerQueue({
+      name: 'approved-simaspro'
+    })
   ],
-  providers: [MediaService],
+  providers: [MediaService, ApprovedSimaspro],
   controllers: [MediaController]
 })
 export class MediaModule {}

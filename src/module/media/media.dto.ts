@@ -19,3 +19,13 @@ export class ApproveMediaDTO {
   @ApiProperty({ required: false })
   reasonId: number;
 }
+
+export class ProcessApprovedMediaDTO {
+  status: number;
+  mediaName: string;
+  userJournalId: number;
+  reasonName: string;
+  userJournalEmail: string;
+  userId: number;
+  reasonId: number;
+}

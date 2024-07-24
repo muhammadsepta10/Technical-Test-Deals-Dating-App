@@ -24,7 +24,7 @@ export class MediaController {
     return this.mediaService.listMedia(param);
   }
 
-  @Get('/detai/:id')
+  @Get('/detail/:id')
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['admin'])
   async detailMedia(@Param('id') id: string) {
