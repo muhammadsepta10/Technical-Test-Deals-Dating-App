@@ -20,6 +20,7 @@ import { AuthModule } from './module/auth/auth.module';
 import { UserModule } from './module/user/user.module';
 import { MediaModule } from './module/media/media.module';
 import { MasterModule } from './module/master/master.module';
+import { MailerModule } from './module/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -56,7 +57,8 @@ import { MasterModule } from './module/master/master.module';
     AuthModule,
     UserModule,
     MediaModule,
-    MasterModule
+    MasterModule,
+    MailerModule
   ],
   controllers: [AppController],
   providers: [AppService]
