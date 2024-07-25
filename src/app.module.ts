@@ -21,9 +21,23 @@ import { UserModule } from './module/user/user.module';
 import { MediaModule } from './module/media/media.module';
 import { MasterModule } from './module/master/master.module';
 import { MailerModule } from './module/mailer/mailer.module';
+import { BullModule } from '@nestjs/bull';
+import { AppConfigService } from '@common/config/api/config.service';
 
 @Module({
   imports: [
+    BullModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => {
+        return {
+          redis: {
+            host: config.HOST_REDIS,
+            port: 6379
+          }
+        };
+      }
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ProjectDbConfigModule],
       inject: [ProjectDbConfigService],
