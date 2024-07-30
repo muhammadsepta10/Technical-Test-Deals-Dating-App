@@ -197,6 +197,10 @@ export class MediaService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+      const userJournalist = await this.userJournalistRepository.findOne({ where: { userId }, select: ['id'] });
+      if (!userJournalist) {
+        throw new BadRequestException('Invalid User');
+      }
       const { categoryId, desc, title, url, verificationNo } = param;
       const category = await this.masterNewsCategoryRepository.findOne({ where: { id: categoryId }, select: ['id'] });
       const checkVerif = await this.journalistVerificationCodeRepository
@@ -210,7 +214,6 @@ export class MediaService {
         .returning(['id'])
         .setQueryRunner(queryRunner)
         .execute();
-      console.log('chec', checkVerif);
       if (checkVerif.affected < 1) {
         throw new BadRequestException('Invalid Verif code');
       }
@@ -225,7 +228,8 @@ export class MediaService {
           title,
           url,
           masterNewsCategoryId: categoryId,
-          journalistVerificationCodeId: checkVerif.raw[0].id
+          journalistVerificationCodeId: checkVerif.raw[0].id,
+          userJournalistId: userJournalist.id
         })
         .setQueryRunner(queryRunner)
         .execute();
