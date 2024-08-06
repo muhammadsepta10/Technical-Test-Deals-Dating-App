@@ -30,9 +30,16 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
   }
 
   async listJournalist(param: ListJournalistParamDTO) {
-    const { limit, search, skip, status, startDate, endDate } = param;
+    const { limit, search, page, status, startDate, endDate } = param;
+    const skip = page * limit;
     const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'On Verif' WHEN status = 2 THEN 'Verified' WHEN status = 3 THEN 'Rejected' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId", TO_CHAR(created_at,'YYYY-MM-DD HH24:MI:SS.MS') "createdDate" FROM user_journalist WHERE 1=1${this._whereStatus(status)}${this._whereKeys(search)}${this._whereDate({ startDate, endDate })} ORDER BY id DESC LIMIT ${limit} OFFSET ${skip}`;
     return this.query(syntax, []);
+  }
+
+  async countData(param: ListJournalistParamDTO): Promise<number> {
+    const { search, status, startDate, endDate } = param;
+    const syntax = `SELECT count(1) cnt FROM user_journalist WHERE 1=1${this._whereStatus(status)}${this._whereKeys(search)}${this._whereDate({ startDate, endDate })}`;
+    return this.query(syntax, []).then(v => +v?.[0]?.cnt || 0);
   }
 
   async detail(id: string) {

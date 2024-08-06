@@ -8,7 +8,7 @@ export class ListMediaDTO {
   @ApiProperty({ required: false })
   limit: number;
   @ApiProperty({ required: false })
-  skip: number;
+  page: number;
   @ApiProperty({ required: false })
   startDate: string;
   @ApiProperty({ required: false })

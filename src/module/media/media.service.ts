@@ -33,8 +33,17 @@ export class MediaService {
   private journalistVerificationCodeRepository: JournalistVerificationCodeRepository;
 
   async listMedia(param: ListMediaDTO) {
+    param.page = param.page > 1 ? param.page - 1 : param.page;
+    const currentPage = param.page < 1 ? 1 : param.page + 1;
     const data = await this.userJournalistRepository.listJournalist(param);
-    return data;
+    const totalData = await this.userJournalistRepository.countData(param);
+    const totalPage = Math.ceil(totalData / param.limit);
+    return {
+      totalData,
+      totalPage,
+      currentPage,
+      raw: data
+    };
   }
 
   async approveMedia(param: ApproveMediaDTO, userId: number) {
@@ -184,7 +193,17 @@ export class MediaService {
   }
 
   async listNews(param: ListMediaDTO) {
-    return this.newsVerificationRepository.list(param);
+    param.page = param.page > 1 ? param.page - 1 : param.page;
+    const currentPage = param.page < 1 ? 1 : param.page + 1;
+    const data = this.newsVerificationRepository.list(param);
+    const totalData = await this.newsVerificationRepository.countData(param);
+    const totalPage = Math.ceil(totalData / param.limit);
+    return {
+      totalData,
+      totalPage,
+      currentPage,
+      raw: data
+    };
   }
 
   async detailNews(id: string) {
