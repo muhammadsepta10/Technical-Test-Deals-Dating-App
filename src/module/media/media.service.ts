@@ -195,7 +195,7 @@ export class MediaService {
   async listNews(param: ListMediaDTO) {
     param.page = param.page >= 1 ? param.page - 1 : param.page;
     const currentPage = param.page <= 1 ? 1 : param.page + 1;
-    const data = this.newsVerificationRepository.list(param);
+    const data = await this.newsVerificationRepository.list(param);
     const totalData = await this.newsVerificationRepository.countData(param);
     const totalPage = Math.ceil(totalData / param.limit);
     return {
