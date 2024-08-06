@@ -9,6 +9,10 @@ export class ListMediaDTO {
   limit: number;
   @ApiProperty({ required: false })
   skip: number;
+  @ApiProperty({ required: false })
+  startDate: string;
+  @ApiProperty({ required: false })
+  endDate: string;
 }
 
 export class ApproveMediaDTO {
@@ -30,8 +34,6 @@ export class ApproveNewsDTO {
 }
 
 export class SubmitNewsDTO {
-  @ApiProperty()
-  verificationNo: string;
   @ApiProperty()
   categoryId: number;
   @ApiProperty()

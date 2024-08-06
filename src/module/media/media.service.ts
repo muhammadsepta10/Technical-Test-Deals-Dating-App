@@ -201,22 +201,22 @@ export class MediaService {
       if (!userJournalist) {
         throw new BadRequestException('Invalid User');
       }
-      const { categoryId, desc, title, url, verificationNo } = param;
+      const { categoryId, desc, title, url } = param;
       const category = await this.masterNewsCategoryRepository.findOne({ where: { id: categoryId }, select: ['id'] });
-      const checkVerif = await this.journalistVerificationCodeRepository
-        .createQueryBuilder()
-        .where('verification_code = :verificationNo AND status = 0', { verificationNo: verificationNo.toUpperCase() })
-        .update()
-        .set({
-          status: 1,
-          used_at: dayjs().format('YYYY-MM-DD HH:mm:ss')
-        })
-        .returning(['id'])
-        .setQueryRunner(queryRunner)
-        .execute();
-      if (checkVerif.affected < 1) {
-        throw new BadRequestException('Invalid Verif code');
-      }
+      // const checkVerif = await this.journalistVerificationCodeRepository
+      //   .createQueryBuilder()
+      //   .where('verification_code = :verificationNo AND status = 0', { verificationNo: verificationNo.toUpperCase() })
+      //   .update()
+      //   .set({
+      //     status: 1,
+      //     used_at: dayjs().format('YYYY-MM-DD HH:mm:ss')
+      //   })
+      //   .returning(['id'])
+      //   .setQueryRunner(queryRunner)
+      //   .execute();
+      // if (checkVerif.affected < 1) {
+      //   throw new BadRequestException('Invalid Verif code');
+      // }
       if (!category) {
         throw new BadRequestException('Invalid Category');
       }
@@ -228,7 +228,7 @@ export class MediaService {
           title,
           url,
           masterNewsCategoryId: categoryId,
-          journalistVerificationCodeId: checkVerif.raw[0].id,
+          // journalistVerificationCodeId: checkVerif.raw[0].id,
           userJournalistId: userJournalist.id
         })
         .setQueryRunner(queryRunner)

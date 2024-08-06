@@ -8,7 +8,9 @@ export class ListMediaPipe extends JoiValidationPipe {
       limit: Joi.number().default(10).optional(),
       search: Joi.string().default('').optional(),
       skip: Joi.number().default(0).optional(),
-      status: Joi.number().default(-1).optional()
+      status: Joi.number().default(-1).optional(),
+      startDate: Joi.date().iso().default('').optional(),
+      endDate: Joi.date().iso().default('').optional()
     });
   }
 }

@@ -3,4 +3,6 @@ export interface ListJournalistParamDTO {
   status: number;
   limit: number;
   skip: number;
+  startDate: string;
+  endDate: string;
 }

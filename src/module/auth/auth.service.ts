@@ -105,7 +105,7 @@ export class AuthService {
 
       // validate user
       const whatsapp_no = this.commonService.changePhone(param.whatsapp_no, '62');
-      const existUser = await this._validateUser({ email, hp: whatsapp_no });
+      const existUser = await this._validateUser({ email, hp: whatsapp_no, no_pers: pers_card_no });
       if (existUser) {
         throw new BadRequestException('Alamat email ini sudah terdaftar. Silakan gunakan alamat email lain.');
       }
@@ -172,7 +172,6 @@ export class AuthService {
           }', 'journalist_doc/${element.filename}', 1)`
         );
       }
-      console.log(`${file.join(',')}`);
 
       if (file.length > 0) {
         const syntax = `INSERT INTO "user_journalist_doc" ("userJournalistId", url, path, status) VALUES ${file.join(
@@ -183,7 +182,6 @@ export class AuthService {
       await queryRunner.commitTransaction();
       return { message: 'registration success' };
     } catch (error) {
-      console.log('error', error);
       await queryRunner.rollbackTransaction();
       if (!error?.response || !error?.status) {
         throw new InternalServerErrorException(error);
@@ -194,8 +192,14 @@ export class AuthService {
     }
   }
 
-  private async _validateUser(params: { email: string; hp: string }): Promise<number> {
+  // async forgotPassword(){
+  // const {email} = param
+  // const userJournalist = await this.userJournalistRepository.findOne({where:{email},select:["status","id"]})
+  // }
+
+  private async _validateUser(params: { email: string; hp: string; no_pers: string }): Promise<number> {
     const email = params?.email?.toLowerCase() || '';
+    const no_pers = params?.no_pers?.toLowerCase() || '';
     const hp = params?.hp?.toLowerCase() || '';
 
     // check email
@@ -203,7 +207,8 @@ export class AuthService {
       select: ['id', 'status'],
       where: [
         { whatsapp_no: hp, status: In([0, 1, 2]) },
-        { email, status: In([0, 1, 2]) }
+        { email, status: In([0, 1, 2]) },
+        { pers_card_no: no_pers, status: In([0, 1, 2]) }
       ]
     });
     return checkUserJournalist?.id;

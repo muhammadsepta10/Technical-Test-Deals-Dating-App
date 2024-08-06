@@ -85,9 +85,9 @@ export class ApprovedSimaspro {
           .set({ status: 2, journalist_id: journalistId, userId: user.identifiers[0].id, approvedById: userId })
           .setQueryRunner(queryRunner)
           .execute();
-        const generatedVoucher = await this._generateVerificationCode(userJournalId, 50, queryRunner);
+        // const generatedVoucher = await this._generateVerificationCode(userJournalId, 50, queryRunner);
         // send email
-        await this._sendMail([journalistId, password, generatedVoucher], 1, userJournalEmail, user.identifiers[0].id);
+        await this._sendMail([journalistId, password], 1, userJournalEmail, user.identifiers[0].id);
       }
 
       if (status == 2) {

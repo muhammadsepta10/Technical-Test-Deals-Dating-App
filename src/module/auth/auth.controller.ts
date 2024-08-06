@@ -34,13 +34,8 @@ export class AuthController {
     return this.authService.register(user, param, appId, files);
   }
 
-  // @Post("/otp")
-  // reqOtp(@Body(ReqOtpPipe) param: ReqOtpDTO) {
-  //     return this.authService.reqOtp(param)
-  // }
-
-  // @Post("/otp/validate")
-  // validateOtp(@Body(ValidateOtpPipe) param: ValidateOtpDTO) {
-  //     return this.authService.validateOtp(param)
+  // @Post("/forgot-pass")
+  // forgotPassword(@Body(ReqOtpPipe) param:ReqOtpDTO){
+  //   // return this.authService.forgotPassword(param)
   // }
 }

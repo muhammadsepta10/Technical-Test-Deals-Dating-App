@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
 import { UserJournalist } from './user-journalist.entity';
 import { ListJournalistParamDTO } from './user-journlist.types';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class UserJournalistRepository extends Repository<UserJournalist> {
@@ -13,15 +14,24 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
     return status < 0 ? '' : ` AND status = ${status}`;
   }
 
+  private _whereDate({ endDate, startDate }: { startDate: string; endDate: string }) {
+    if (startDate && endDate && dayjs(startDate, 'YYYY-MM-DD').isValid() && dayjs(endDate, 'YYYY-MM-DD').isValid()) {
+      startDate = dayjs(startDate).format('YYYY-MM-DD');
+      endDate = dayjs(endDate).format('YYYY-MM-DD');
+      return ` AND (TO_CHAR(created_at,'YYYY-MM-DD') BETWEEN '${startDate}' AND '${endDate}')`;
+    }
+    return '';
+  }
+
   private _whereKeys(search: string) {
     return search?.length < 1
       ? ''
-      : ` AND (media_name LIKE '%${search}%' OR whatsapp_no LIKE '%${search}%' OR email LIKE '%${search}%')`;
+      : ` AND (media_name LIKE '%${search}%' OR whatsapp_no LIKE '%${search}%' OR email LIKE '%${search}%' OR journalist_id LIKE '%${search}%')`;
   }
 
   async listJournalist(param: ListJournalistParamDTO) {
-    const { limit, search, skip, status } = param;
-    const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'On Verif' WHEN status = 2 THEN 'Verified' WHEN status = 3 THEN 'Rejected' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId" FROM user_journalist WHERE 1=1${this._whereStatus(status)}${this._whereKeys(search)} LIMIT ${limit} OFFSET ${skip}`;
+    const { limit, search, skip, status, startDate, endDate } = param;
+    const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'On Verif' WHEN status = 2 THEN 'Verified' WHEN status = 3 THEN 'Rejected' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId", TO_CHAR(created_at,'YYYY-MM-DD HH24:MI:SS.MS') "createdDate" FROM user_journalist WHERE 1=1${this._whereStatus(status)}${this._whereKeys(search)}${this._whereDate({ startDate, endDate })} ORDER BY id DESC LIMIT ${limit} OFFSET ${skip}`;
     return this.query(syntax, []);
   }
 
