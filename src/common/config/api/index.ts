@@ -9,5 +9,6 @@ export default registerAs('app', () => ({
   BASE_URL: process.env.BASE_URL,
   HOST_REDIS: process.env.HOST_REDIS,
   MAIL_USER: process.env.MAIL_USER,
-  MAIL_PASS: process.env.MAIL_PASS
+  MAIL_PASS: process.env.MAIL_PASS,
+  WEB_BASE_URL: process.env.WEB_BASE_URL
 }));

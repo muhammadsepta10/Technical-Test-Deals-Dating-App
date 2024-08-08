@@ -35,4 +35,7 @@ export class AppConfigService {
   get MAIL_PASS(): string {
     return this.configService.get<string>('app.MAIL_PASS');
   }
+  get WEB_BASE_URL(): string {
+    return this.configService.get<string>('app.WEB_BASE_URL');
+  }
 }

@@ -19,7 +19,8 @@ import * as Joi from 'joi';
         BASE_URL: Joi.string(),
         MAIL_USER: Joi.string(),
         MAIL_PASS: Joi.string(),
-        HOST_REDIS: Joi.string()
+        HOST_REDIS: Joi.string(),
+        WEB_BASE_URL: Joi.string()
       })
     })
   ],

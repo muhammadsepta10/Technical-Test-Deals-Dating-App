@@ -16,7 +16,7 @@ export class ProjectDbConfigService {
       username: this.configService.get<string>('project-db.USER') || process.env.PROJECT_DB_USER,
       password: this.configService.get<string>('project-db.PASS') || process.env.PROJECT_DB_PASS,
       database: this.configService.get<string>('project-db.NAME') || process.env.PROJECT_DB_NAME,
-      logging: false,
+      logging: true,
       synchronize: false, // dont change to true, use migration in server to update database
       // synchronize: true, // dont change to true, use migration in server to update database
       entities: [join(__dirname + '/../../../../db/project-db/entity/**/*.entity.{ts,js}')],
