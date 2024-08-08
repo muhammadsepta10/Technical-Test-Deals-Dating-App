@@ -34,7 +34,7 @@ export class MediaService {
 
   async listMedia(param: ListMediaDTO) {
     param.page = param.page >= 1 ? param.page - 1 : param.page;
-    const currentPage = param.page <= 1 ? 1 : param.page + 1;
+    const currentPage = param.page < 1 ? 1 : param.page + 1;
     const data = await this.userJournalistRepository.listJournalist(param);
     const totalData = await this.userJournalistRepository.countData(param);
     const totalPage = Math.ceil(totalData / param.limit);
@@ -50,7 +50,7 @@ export class MediaService {
     const { mediaId, reasonId, status } = param;
     const userJournal = await this.userJournalistRepository.findOne({
       where: { uuid: mediaId },
-      select: ['id', 'status', 'media_name', 'email']
+      select: ['id', 'status', 'media_name', 'email', 'sortId', 'created_at']
     });
     if (!userJournal) {
       throw new BadRequestException('Invalid Media');
@@ -69,7 +69,9 @@ export class MediaService {
         userId,
         userJournalEmail: userJournal?.email,
         userJournalId: userJournal?.id,
-        reasonId: 0
+        reasonId: 0,
+        createdTime: userJournal?.created_at,
+        sortId: userJournal?.sortId
       });
     }
     if (status === 2) {
@@ -87,7 +89,9 @@ export class MediaService {
         userId,
         userJournalEmail: userJournal?.email,
         userJournalId: userJournal?.id,
-        reasonId
+        reasonId,
+        createdTime: userJournal?.created_at,
+        sortId: userJournal?.sortId
       });
     }
   }
@@ -167,6 +171,7 @@ export class MediaService {
       await queryRunner.commitTransaction();
       return { message: 'Success Approve News' };
     } catch (error) {
+      console.log('error', error);
       await queryRunner.rollbackTransaction();
       if (!error?.response || !error?.status) {
         throw new InternalServerErrorException(error);
@@ -194,7 +199,7 @@ export class MediaService {
 
   async listNews(param: ListMediaDTO) {
     param.page = param.page >= 1 ? param.page - 1 : param.page;
-    const currentPage = param.page <= 1 ? 1 : param.page + 1;
+    const currentPage = param.page < 1 ? 1 : param.page + 1;
     const data = await this.newsVerificationRepository.list(param);
     const totalData = await this.newsVerificationRepository.countData(param);
     const totalPage = Math.ceil(totalData / param.limit);

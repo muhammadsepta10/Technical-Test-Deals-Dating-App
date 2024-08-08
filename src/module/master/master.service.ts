@@ -10,6 +10,8 @@ import { MasterInvalidReasonRepository } from 'src/db/project-db/entity/master-i
 import { ListReasonDTO, MasterScriptDTO } from './master.dto';
 import { MoreThan } from 'typeorm';
 import { MasterScriptRepository } from 'src/db/project-db/entity/master-script/master-script.repository';
+import { MasterInstanceCategoryRepository } from 'src/db/project-db/entity/master-instance-category/master-instance-category.repository';
+import { MasterWorkUnitRepository } from 'src/db/project-db/entity/master-work-unit/master-work-unit.repository';
 
 @Injectable()
 export class MasterService {
@@ -22,6 +24,9 @@ export class MasterService {
   @InjectRepository(MasterNewsCategoryRepository) private masterNewsCategoryRepository: MasterNewsCategoryRepository;
   @InjectRepository(MasterInvalidReasonRepository) private masterInvalidReasonRepository: MasterInvalidReasonRepository;
   @InjectRepository(MasterScriptRepository) private masterScriptRepository: MasterScriptRepository;
+  @InjectRepository(MasterInstanceCategoryRepository)
+  private masterInstanceCategoryRepository: MasterInstanceCategoryRepository;
+  @InjectRepository(MasterWorkUnitRepository) private masterWorkUnitRepository: MasterWorkUnitRepository;
 
   async listMenu(accessId: number) {
     let menu = [];
@@ -60,6 +65,40 @@ export class MasterService {
       await this.cacheService.set(cacheKey, JSON.stringify(menu), menu?.length < 1 ? 1 : 3600);
     }
     return menu;
+  }
+
+  async instanceCategory() {
+    let data = {};
+    const cacheKey = 'instanceCategoryCache';
+    data = await this.cacheService.get(cacheKey).then(v => {
+      return !v ? {} : JSON.parse(v);
+    });
+    if (Object.keys(data).length < 1) {
+      data = await this.masterInstanceCategoryRepository
+        .createQueryBuilder('instanceCatgory')
+        .where('status = 1')
+        .select(['instanceCatgory.id', 'instanceCatgory.name'])
+        .getMany();
+      await this.cacheService.set(cacheKey, JSON.stringify(data), Object.keys(data).length === 0 ? 1 : 3600);
+    }
+    return data;
+  }
+
+  async workUnit() {
+    let data = {};
+    const cacheKey = 'workUnitCache';
+    data = await this.cacheService.get(cacheKey).then(v => {
+      return !v ? {} : JSON.parse(v);
+    });
+    if (Object.keys(data).length < 1) {
+      data = await this.masterWorkUnitRepository
+        .createQueryBuilder('workUnit')
+        .where('status = 1')
+        .select(['workUnit.id', 'workUnit.name'])
+        .getMany();
+      await this.cacheService.set(cacheKey, JSON.stringify(data), Object.keys(data).length === 0 ? 1 : 3600);
+    }
+    return data;
   }
 
   async script(): Promise<MasterScriptDTO> {

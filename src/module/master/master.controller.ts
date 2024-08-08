@@ -44,4 +44,14 @@ export class MasterController {
   lsitReason(@Query(ListReasonPipe) param: ListReasonDTO) {
     return this.masterService.invalidReason(param);
   }
+
+  @Get('/work-unit')
+  workUnit() {
+    return this.masterService.workUnit();
+  }
+
+  @Get('/instance-category')
+  instanceCategory() {
+    return this.masterService.instanceCategory();
+  }
 }

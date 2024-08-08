@@ -36,7 +36,8 @@ export class ApprovedSimaspro {
   @Process()
   async processApprovedSimaspro(job: Job<ProcessApprovedMediaDTO>) {
     const { USER_ACCESS_ID, USER_APP_ID } = await this.commonService.generalParameter();
-    const { status, mediaName, userJournalId, reasonName, userJournalEmail, userId, reasonId } = job.data;
+    const { status, mediaName, userJournalId, reasonName, userJournalEmail, userId, reasonId, createdTime, sortId } =
+      job.data;
     const dataSource = await this.projectDbConfigService.dbConnection();
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -45,19 +46,21 @@ export class ApprovedSimaspro {
       if (status == 1) {
         // approved
         let journalistId = '';
-        let isUnique = true;
-        while (isUnique) {
-          journalistId = (await this.commonService.randString(8, '34679QWERTYUPADFGHJKLXCVNM', ``))?.toLowerCase();
-          const existJournalId = await this.userJournalistRepository.findOne({
-            where: { journalist_id: journalistId },
-            select: ['id']
-          });
-          if (!existJournalId) {
-            isUnique = false;
-          }
-        }
+        // let isUnique = true;
+        // while (isUnique) {
+        //   journalistId = (await this.commonService.randString(8, '34679QWERTYUPADFGHJKLXCVNM', ``))?.toLowerCase();
+        //   const existJournalId = await this.userJournalistRepository.findOne({
+        //     where: { journalist_id: journalistId },
+        //     select: ['id']
+        //   });
+        //   if (!existJournalId) {
+        //     isUnique = false;
+        //   }
+        // }
         const password = await this.commonService.randString(8, '34679QWERTYUPADFGHJKLXCVNM', '');
         const hashPassword = await this.commonService.bcrpytSign(password);
+        journalistId = await this._idGenerated(`${sortId}`, createdTime);
+        console.log('journa', journalistId);
         const user = await this.userRepository
           .createQueryBuilder()
           .insert()
@@ -79,13 +82,13 @@ export class ApprovedSimaspro {
           .setQueryRunner(queryRunner)
           .execute();
         await this.userJournalistRepository
-          .createQueryBuilder()
+          .createQueryBuilder('userJournalist')
           .update()
           .where('id = :id', { id: userJournalId })
           .set({ status: 2, journalist_id: journalistId, userId: user.identifiers[0].id, approvedById: userId })
           .setQueryRunner(queryRunner)
+          .returning(['userJournalist.sortId', 'userJournalist.created_at'])
           .execute();
-        // const generatedVoucher = await this._generateVerificationCode(userJournalId, 50, queryRunner);
         // send email
         await this._sendMail([journalistId, password], 1, userJournalEmail, user.identifiers[0].id);
       }
@@ -118,11 +121,18 @@ export class ApprovedSimaspro {
         });
       await queryRunner.commitTransaction();
     } catch (error) {
+      console.log('err', error);
       await queryRunner.rollbackTransaction();
       throw new Error(error.stack);
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private _idGenerated(sortId: string, createdTime: string) {
+    sortId = sortId.length == 1 ? `00${sortId}` : sortId.length == 2 ? `0${sortId}` : sortId;
+    const journalistId = `${sortId}${dayJs(createdTime).format('MMYYYY')}`;
+    return journalistId;
   }
 
   private async _sendMail(params: string[], status: number, email: string, userId: number) {

@@ -13,6 +13,8 @@ import { UserModule } from '../user/user.module';
 import { LoginSessionDbModule } from 'src/db/project-db/entity/login-session/login-session.module';
 import { MasterInvalidReasonModule } from 'src/db/project-db/entity/master-invalid-reason/master-invalid-reason.module';
 import { MasterScriptDbModule } from 'src/db/project-db/entity/master-script/master-script.module';
+import { MasterWorkUnitDbModule } from 'src/db/project-db/entity/master-work-unit/master-work-unit.module';
+import { MasterInstanceCategoryDbModule } from 'src/db/project-db/entity/master-instance-category/master-instance-category.module';
 
 @Module({
   providers: [MasterService],
@@ -29,7 +31,9 @@ import { MasterScriptDbModule } from 'src/db/project-db/entity/master-script/mas
     UserModule,
     LoginSessionDbModule,
     MasterInvalidReasonModule,
-    MasterScriptDbModule
+    MasterScriptDbModule,
+    MasterWorkUnitDbModule,
+    MasterInstanceCategoryDbModule
   ],
   exports: [MasterService]
 })

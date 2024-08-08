@@ -54,4 +54,6 @@ export class ProcessApprovedMediaDTO {
   userJournalEmail: string;
   userId: number;
   reasonId: number;
+  sortId: number;
+  createdTime: string;
 }
