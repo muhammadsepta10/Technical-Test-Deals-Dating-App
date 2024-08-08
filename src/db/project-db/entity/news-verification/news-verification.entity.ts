@@ -20,6 +20,9 @@ export class NewsVerification {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column({ type: 'int', generated: 'increment', default: null, nullable: true, unique: true })
+  sortId: number;
+
   @ManyToOne(() => User, user => user.id)
   verifiedBy: User;
   @Column({ default: null, nullable: true })

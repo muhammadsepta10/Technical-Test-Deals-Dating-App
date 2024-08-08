@@ -20,6 +20,9 @@ export class UserJournalist {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column({ type: 'int', generated: 'increment', default: null, nullable: true, unique: true })
+  sortId: number;
+
   @OneToMany(() => UserJournalistDoc, userJournalistDoc => userJournalistDoc.userJournalist)
   UserJournalistDoc: UserJournalistDoc[];
 
@@ -104,7 +107,7 @@ export class UserJournalist {
   @Column({ type: 'varchar', length: 150, nullable: true })
   podcast_link: string;
 
-  @Column({ type: 'varchar', length: 8, unique: true, nullable: true, comment: 'auto generated on approved' })
+  @Column({ type: 'varchar', length: 100, unique: true, nullable: true, comment: 'auto generated on approved' })
   journalist_id: string;
 
   @CreateDateColumn({

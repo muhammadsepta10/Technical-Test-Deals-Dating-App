@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
 import { User } from '../user/user.entity';
 
-@Entity('guest_book')
-export class GuestBook {
+@Entity('master_instance_category')
+export class MasterInstanceCategory {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -13,11 +13,8 @@ export class GuestBook {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  instance_name: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  wa_no: string;
+  @Column({ type: 'int', default: 0, comment: '0->inactive, 1->active' })
+  status: number;
 
   @ManyToOne(() => User, user => user.id)
   createdBy: User;
