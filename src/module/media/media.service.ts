@@ -255,7 +255,6 @@ export class MediaService {
   }
 
   private async _listInvoiceAdmin() {
-    // userId = +userId || 0;
     const invoice = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .innerJoinAndSelect('invoice.items', 'items')
