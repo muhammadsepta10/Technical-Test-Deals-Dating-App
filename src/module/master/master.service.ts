@@ -17,16 +17,24 @@ import { MasterWorkUnitRepository } from 'src/db/project-db/entity/master-work-u
 export class MasterService {
   constructor(private cacheService: CacheService) {}
 
-  @InjectRepository(MasterMenuRepository) private masterMenuRepository: MasterMenuRepository;
-  @InjectRepository(MasterAccessRepository) private masterAccessRepository: MasterAccessRepository;
-  @InjectRepository(MasterBankRepository) private masterBankRepository: MasterBankRepository;
-  @InjectRepository(MasterMediaRepository) private masterMediaRepository: MasterMediaRepository;
-  @InjectRepository(MasterNewsCategoryRepository) private masterNewsCategoryRepository: MasterNewsCategoryRepository;
-  @InjectRepository(MasterInvalidReasonRepository) private masterInvalidReasonRepository: MasterInvalidReasonRepository;
-  @InjectRepository(MasterScriptRepository) private masterScriptRepository: MasterScriptRepository;
+  @InjectRepository(MasterMenuRepository)
+  private masterMenuRepository: MasterMenuRepository;
+  @InjectRepository(MasterAccessRepository)
+  private masterAccessRepository: MasterAccessRepository;
+  @InjectRepository(MasterBankRepository)
+  private masterBankRepository: MasterBankRepository;
+  @InjectRepository(MasterMediaRepository)
+  private masterMediaRepository: MasterMediaRepository;
+  @InjectRepository(MasterNewsCategoryRepository)
+  private masterNewsCategoryRepository: MasterNewsCategoryRepository;
+  @InjectRepository(MasterInvalidReasonRepository)
+  private masterInvalidReasonRepository: MasterInvalidReasonRepository;
+  @InjectRepository(MasterScriptRepository)
+  private masterScriptRepository: MasterScriptRepository;
   @InjectRepository(MasterInstanceCategoryRepository)
   private masterInstanceCategoryRepository: MasterInstanceCategoryRepository;
-  @InjectRepository(MasterWorkUnitRepository) private masterWorkUnitRepository: MasterWorkUnitRepository;
+  @InjectRepository(MasterWorkUnitRepository)
+  private masterWorkUnitRepository: MasterWorkUnitRepository;
 
   async listMenu(accessId: number) {
     let menu = [];
@@ -111,13 +119,14 @@ export class MasterService {
       const arrData = await this.masterScriptRepository
         .createQueryBuilder('script')
         .where('script.status = 1')
-        .select(['id', 'name', 'banner', 'title', 'body'])
+        .select(['id', 'name', 'banner', 'title', 'body', 'html_template'])
         .getRawMany();
       arrData.map(v => {
         data[v.name] = {
           title: v.title,
           banner: v.banner,
-          body: v.body
+          body: v.body,
+          html_template: v.html_template
         };
       });
       await this.cacheService.set(cacheKey, JSON.stringify(data), Object.keys(data).length === 0 ? 1 : 3600);
@@ -152,17 +161,26 @@ export class MasterService {
   }
 
   async listBank() {
-    const data = await this.masterBankRepository.find({ where: { status: 1 }, select: ['id', 'code', 'name'] });
+    const data = await this.masterBankRepository.find({
+      where: { status: 1 },
+      select: ['id', 'code', 'name']
+    });
     return data;
   }
 
   async listMedia() {
-    const data = await this.masterMediaRepository.find({ where: { status: 1 }, select: ['id', 'name', 'code'] });
+    const data = await this.masterMediaRepository.find({
+      where: { status: 1 },
+      select: ['id', 'name', 'code']
+    });
     return data;
   }
 
   async newsCategory() {
-    const data = await this.masterNewsCategoryRepository.find({ where: { status: 1 }, select: ['id', 'description'] });
+    const data = await this.masterNewsCategoryRepository.find({
+      where: { status: 1 },
+      select: ['id', 'description']
+    });
     return data;
   }
 

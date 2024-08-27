@@ -10,5 +10,6 @@ export interface MasterScriptDTO {
     title: string;
     banner: string;
     body: string;
+    html_template: string;
   };
 }
