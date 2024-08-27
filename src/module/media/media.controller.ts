@@ -5,11 +5,12 @@ import { MediaService } from './media.service';
 import { AuthGuard } from '@common/guards/auth.guard';
 import { RoleGuard } from '@common/guards/role.guard';
 import { Roles } from '@common/decorators/role.decorator';
-import { ApproveMediaDTO, ApproveNewsDTO, ListMediaDTO, SubmitNewsDTO } from './media.dto';
-import { ApproveMediaPipe, ApproveNewsPipe, ListMediaPipe } from './media.pipe';
+import { ApproveMediaDTO, ApproveNewsDTO, ListMediaDTO, NewsItemsDTO, SubmitNewsDTO } from './media.dto';
+import { ApproveMediaPipe, ApproveNewsPipe, GenerateInvoicePipe, ListMediaPipe } from './media.pipe';
 import { User } from '@common/decorators/param.user.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '@common/config/multer';
+import { Access } from '@common/decorators/param.access.decorator';
 
 @Controller('/api/media')
 @ApiTags('media')
@@ -45,6 +46,24 @@ export class MediaController {
   @Roles(['admin'])
   async approveNews(@Body(ApproveNewsPipe) param: ApproveNewsDTO, @User() user) {
     return this.mediaService.approveNews(param, user);
+  }
+
+  @Get('/invoice/:id')
+  async getInvoice(@Param('id') id: string) {
+    return this.mediaService.getInvoice(id);
+  }
+
+  @Get('/invoice')
+  @UseGuards(AuthGuard, RoleGuard)
+  async getListInvoice(@User() userId, @Access() role: string) {
+    return this.mediaService.getListInvoice(userId, role);
+  }
+
+  @Post('/invoice')
+  @UseGuards(AuthGuard)
+  @ApiBody({ type: [NewsItemsDTO] })
+  async generateInvlice(@User() user: number, @Body(GenerateInvoicePipe) param: NewsItemsDTO[]) {
+    return this.mediaService.generateInvoice(param, user);
   }
 
   @Get('/news')

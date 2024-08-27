@@ -20,6 +20,8 @@ import { UserJournalistHistoryModule } from 'src/db/project-db/entity/user-journ
 import { AppConfigModule } from '@common/config/api/config.module';
 import { MasterNewsCategoryModule } from 'src/db/project-db/entity/master-news-category/master-news-category.module';
 import { NewsVerificationDocModule } from 'src/db/project-db/entity/news-verification-doc/news-verification-doc.module';
+import { NewsInvoiceDbModule } from 'src/db/project-db/entity/news-invoice/news-invoice.module';
+import { InvoiceDbModule } from 'src/db/project-db/entity/invoice/invoice.module';
 
 @Module({
   imports: [
@@ -42,7 +44,9 @@ import { NewsVerificationDocModule } from 'src/db/project-db/entity/news-verific
     UserJournalistHistoryModule,
     AppConfigModule,
     MasterNewsCategoryModule,
-    NewsVerificationDocModule
+    NewsVerificationDocModule,
+    NewsInvoiceDbModule,
+    InvoiceDbModule
   ],
   providers: [MediaService, ApprovedSimaspro],
   controllers: [MediaController]

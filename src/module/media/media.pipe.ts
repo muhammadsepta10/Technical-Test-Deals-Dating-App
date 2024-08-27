@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 import { JoiValidationPipe } from '@common/pipes/joi-validation.pipe';
-import { ApproveMediaDTO, ApproveNewsDTO, ListMediaDTO } from './media.dto';
+import { ApproveMediaDTO, ApproveNewsDTO, ListMediaDTO, NewsItemsDTO } from './media.dto';
 
 export class ListMediaPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
@@ -26,6 +26,18 @@ export class ApproveMediaPipe extends JoiValidationPipe {
         otherwise: Joi.allow(0).optional()
       })
     });
+  }
+}
+
+export class GenerateInvoicePipe extends JoiValidationPipe {
+  public buildSchema(): Joi.Schema {
+    return Joi.array().items(
+      Joi.object<NewsItemsDTO>({
+        newsId: Joi.string().uuid().required(),
+        price: Joi.number().min(1).required(),
+        quantity: Joi.number().min(1)
+      })
+    );
   }
 }
 

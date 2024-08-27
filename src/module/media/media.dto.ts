@@ -42,7 +42,11 @@ export class SubmitNewsDTO {
   desc: string;
   @ApiProperty()
   url: string;
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'Files' })
+  @ApiProperty({
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    description: 'Files'
+  })
   files: Express.Multer.File[];
 }
 
@@ -56,4 +60,13 @@ export class ProcessApprovedMediaDTO {
   reasonId: number;
   sortId: number;
   createdTime: string;
+}
+
+export class NewsItemsDTO {
+  @ApiProperty()
+  newsId: string;
+  @ApiProperty()
+  price: number;
+  @ApiProperty()
+  quantity: number;
 }
