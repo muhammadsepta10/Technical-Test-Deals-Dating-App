@@ -16,7 +16,22 @@ export class MasterScript {
   @Column({ type: 'text', default: '', nullable: true })
   html_template: string;
 
-  @Column({ type: 'varchar', unique: true, default: '', nullable: true, comment: 'Variable Name' })
+  @Column({
+    type: 'text',
+    default: null,
+    nullable: true,
+    comment:
+      '[string], jumlah array sesuai params di html template, jika tidak ada additional html isi empty string saja'
+  })
+  additional_html_template: string;
+
+  @Column({
+    type: 'varchar',
+    unique: true,
+    default: '',
+    nullable: true,
+    comment: 'Variable Name'
+  })
   name: string;
 
   @Column({ type: 'text', default: null, nullable: true })

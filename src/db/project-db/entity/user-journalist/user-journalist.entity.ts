@@ -20,7 +20,13 @@ export class UserJournalist {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column({ type: 'int', generated: 'increment', default: null, nullable: true, unique: true })
+  @Column({
+    type: 'int',
+    generated: 'increment',
+    default: null,
+    nullable: true,
+    unique: true
+  })
   sortId: number;
 
   @OneToMany(() => UserJournalistDoc, userJournalistDoc => userJournalistDoc.userJournalist)
@@ -64,7 +70,7 @@ export class UserJournalist {
   @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   email: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false, default: '' })
   address: string;
 
   @ManyToOne(() => MasterBank, bank => bank.id)
@@ -77,10 +83,13 @@ export class UserJournalist {
   @Column({ default: null, nullable: true })
   masterInvalidReasonId: number;
 
-  @Column({ type: 'varchar', length: 20, nullable: false })
+  @Column({ type: 'varchar', length: 20, nullable: false, default: '' })
   account_no: string;
 
-  @Column({ type: 'varchar', length: 30, nullable: false })
+  @Column({ type: 'varchar', length: 20, nullable: true, default: '' })
+  bank_account_name: string;
+
+  @Column({ type: 'varchar', length: 30, nullable: false, default: '' })
   pers_card_no: string;
 
   @Column({ type: 'varchar', length: 16, nullable: true })
@@ -107,7 +116,13 @@ export class UserJournalist {
   @Column({ type: 'varchar', length: 150, nullable: true })
   podcast_link: string;
 
-  @Column({ type: 'varchar', length: 100, unique: true, nullable: true, comment: 'auto generated on approved' })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    unique: true,
+    nullable: true,
+    comment: 'auto generated on approved'
+  })
   journalist_id: string;
 
   @CreateDateColumn({

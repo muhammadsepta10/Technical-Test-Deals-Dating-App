@@ -18,19 +18,37 @@ export class GeneralParameter {
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uuid: string;
 
-  @Column({ type: 'varchar', length: 255, default: null, unique: true, nullable: true })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    default: null,
+    unique: true,
+    nullable: true
+  })
   name: string;
 
-  @Column({ type: 'varchar', length: 255, default: '', nullable: true })
+  @Column({ type: 'text', default: '', nullable: true })
   value: string;
 
   @Column({ type: 'enum', enum: TypeData, default: TypeData.STRING })
   type: TypeData;
 
-  @Column({ type: 'smallint', width: 3, default: 0, comment: '0->inactive, 1->active', nullable: true })
+  @Column({
+    type: 'smallint',
+    width: 3,
+    default: 0,
+    comment: '0->inactive, 1->active',
+    nullable: true
+  })
   status: number;
 
-  @Column({ type: 'smallint', width: 2, default: 0, comment: '0->active, 1->inactive', nullable: true })
+  @Column({
+    type: 'smallint',
+    width: 2,
+    default: 0,
+    comment: '0->active, 1->inactive',
+    nullable: true
+  })
   is_deleted: number;
 
   @ManyToOne(() => MasterMedia, media => media.id)
@@ -53,12 +71,23 @@ export class GeneralParameter {
   @Column({ default: null, nullable: true })
   deletedById: number;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'NULL', nullable: true })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'NULL',
+    nullable: true
+  })
   deleted_at: string;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)'
+  })
   created_at: string;
 
-  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)'
+  })
   updated_at: string;
 }
