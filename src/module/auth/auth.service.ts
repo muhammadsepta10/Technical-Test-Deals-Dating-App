@@ -11,6 +11,7 @@ import { MasterBankRepository } from 'src/db/project-db/entity/master-bank/maste
 import { UserJournalist } from 'src/db/project-db/entity/user-journalist/user-journalist.entity';
 import { AppConfigService } from '@common/config/api/config.service';
 import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
+import { MasterAccessRepository } from 'src/db/project-db/entity/master-access/master-access.repository';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,8 @@ export class AuthService {
   private loginSessionRepository: LoginSessionRepository;
   @InjectRepository(MasterBankRepository)
   private masterBankRepository: MasterBankRepository;
+  @InjectRepository(MasterAccessRepository)
+  private masterAccessRepository: MasterAccessRepository;
 
   async login(param: LoginDTO) {
     const { password, username } = param;
@@ -72,9 +75,16 @@ export class AuthService {
         status: 1
       })
       .then(v => v.generatedMaps[0]);
+    const access = await this.masterAccessRepository.findOne({
+      where: { id: accessId },
+      select: ['code']
+    });
+    if (!access) {
+      throw new BadRequestException('Invalid Access');
+    }
     const token = await this.commonService.generateAuthToken({
       sessionId: `${saveLoginSession?.sessionId}`,
-      accessId,
+      accessId: access.code,
       appId
     });
     return token;
@@ -100,12 +110,17 @@ export class AuthService {
         tiktok_link,
         youtube_link,
         website_link,
-        podcast_link
+        podcast_link,
+        account_name
       } = param;
 
       // validate user
       const whatsapp_no = this.commonService.changePhone(param.whatsapp_no, '62');
-      const existUser = await this._validateUser({ email, hp: whatsapp_no, no_pers: pers_card_no });
+      const existUser = await this._validateUser({
+        email,
+        hp: whatsapp_no,
+        no_pers: pers_card_no
+      });
       if (existUser) {
         throw new BadRequestException('Alamat email ini sudah terdaftar. Silakan gunakan alamat email lain.');
       }
@@ -113,7 +128,10 @@ export class AuthService {
       // cleansing data
 
       // check master data
-      const bankType = await this.masterBankRepository.findOne({ where: { id: bankId }, select: ['id'] });
+      const bankType = await this.masterBankRepository.findOne({
+        where: { id: bankId },
+        select: ['id']
+      });
       if (!bankType) {
         throw new BadRequestException('Invalid Bank Type');
       }
@@ -136,6 +154,8 @@ export class AuthService {
       newUserJournalist.website_link = website_link || '';
       newUserJournalist.podcast_link = podcast_link || '';
       newUserJournalist.status = 0;
+      newUserJournalist.bank_account_name = account_name;
+      newUserJournalist.masterBankId = bankType.id;
 
       const createNewJournalist = await queryRunner.manager
         .createQueryBuilder(UserJournalist, 'userJournalist')
@@ -156,7 +176,9 @@ export class AuthService {
             'youtube_link',
             'website_link',
             'podcast_link',
-            'status'
+            'status',
+            'bank_account_name',
+            'masterBankId'
           ],
           ['email']
         )

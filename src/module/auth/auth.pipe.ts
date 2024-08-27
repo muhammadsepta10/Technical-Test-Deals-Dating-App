@@ -59,6 +59,7 @@ export class RegisterPipe extends JoiValidationPipe {
       bankId: Joi.number().required(),
       account_no: Joi.number().required(),
       pers_card_no: Joi.string().trim().required(),
+      account_name: Joi.string().trim().uppercase().required(),
       npwp: Joi.string().trim().required().min(15).max(17),
       instagram_link: Joi.string().trim(),
       facebook_link: Joi.string().trim(),

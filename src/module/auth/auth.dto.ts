@@ -69,6 +69,8 @@ export class RegisterDTO {
   @ApiProperty({ required: true })
   account_no: number;
   @ApiProperty({ required: true })
+  account_name: string;
+  @ApiProperty({ required: true })
   pers_card_no: string;
   @ApiProperty()
   npwp: string;
@@ -86,7 +88,11 @@ export class RegisterDTO {
   website_link: string;
   @ApiProperty()
   podcast_link: string;
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'Files' })
+  @ApiProperty({
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    description: 'Files'
+  })
   files: Express.Multer.File[];
 }
 
