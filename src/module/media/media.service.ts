@@ -2,6 +2,7 @@ import { BadRequestException, HttpException, Injectable, InternalServerErrorExce
 import {
   ApproveMediaDTO,
   ApproveNewsDTO,
+  CartDto,
   ListMediaDTO,
   NewsItemsDTO,
   ProcessApprovedMediaDTO,
@@ -24,6 +25,7 @@ import { NewsInvoiceRepository } from 'src/db/project-db/entity/news-invoice/new
 import { CommonService } from '@common/service/common.service';
 import { InvoiceRepository } from 'src/db/project-db/entity/invoice/invoice.repository';
 import { QueryRunner } from 'typeorm';
+import 'dayjs/locale/id';
 
 @Injectable()
 export class MediaService {
@@ -450,7 +452,7 @@ export class MediaService {
     };
   }
 
-  async listNews(param: ListMediaDTO) {
+  private async _listNewsAdmin(param: ListMediaDTO) {
     param.page = param.page >= 1 ? param.page - 1 : param.page;
     const currentPage = param.page < 1 ? 1 : param.page + 1;
     const data = await this.newsVerificationRepository.list(param);
@@ -464,8 +466,92 @@ export class MediaService {
     };
   }
 
+  private async _listNewsUser(param: ListMediaDTO) {
+    param.userId = 0;
+    param.page = param.page >= 1 ? param.page - 1 : param.page;
+    const currentPage = param.page < 1 ? 1 : param.page + 1;
+    const data = await this.newsVerificationRepository.list(param);
+    const totalData = await this.newsVerificationRepository.countData(param);
+    const totalPage = Math.ceil(totalData / param.limit);
+    return {
+      totalData,
+      totalPage,
+      currentPage,
+      raw: data
+    };
+  }
+
+  async listNews(param: ListMediaDTO, user, role) {
+    const roleActions = {
+      admin: this._listNewsAdmin.bind(this),
+      supplier: this._listNewsUser.bind(this)
+    };
+    return roleActions[role][{ ...param, userId: user }];
+  }
+
   async detailNews(id: string) {
     return this.newsVerificationRepository.detail(id);
+  }
+
+  private async _cartUser(param: CartDto) {
+    const cartNews = await this.newsVerificationRepository.cart(param.userId);
+    const cartNewsPerMonth = await this.newsVerificationRepository.cartPerMonth(param.year, param.userId).then(vals =>
+      vals.map(v => {
+        return {
+          ...v,
+          month: dayjs(v.month).locale('ID').format('MMMM')
+        };
+      })
+    );
+    return {
+      news: {
+        cart: cartNews,
+        perMonth: cartNewsPerMonth
+      },
+      media: {
+        cart: {},
+        perMonth: []
+      }
+    };
+  }
+
+  private async _cartAdmin(param: CartDto) {
+    const cartNews = await this.newsVerificationRepository.cart();
+    const cartNewsPerMonth = await this.newsVerificationRepository.cartPerMonth(param.year).then(vals =>
+      vals.map(v => {
+        return {
+          ...v,
+          month: dayjs(v.month).locale('id').format('MMMM')
+        };
+      })
+    );
+    const cartMedia = await this.userJournalistRepository.cart();
+    const cartMediaPerMonth = await this.userJournalistRepository.cartPerMonth(param.year).then(vals =>
+      vals.map(v => {
+        return {
+          ...v,
+          month: dayjs(v.month).locale('id').format('MMMM')
+        };
+      })
+    );
+    return {
+      news: {
+        cart: cartNews,
+        perMonth: cartNewsPerMonth
+      },
+      media: {
+        cart: cartMedia,
+        perMonth: cartMediaPerMonth
+      }
+    };
+  }
+
+  async cart(param: CartDto, userId: number, role) {
+    const roleActions = {
+      admin: this._cartAdmin.bind(this),
+      supplier: this._cartUser.bind(this)
+    };
+    return roleActions[role](param, userId);
   }
 
   async submitNews(param: SubmitNewsDTO, files: Express.Multer.File[], userId: number) {

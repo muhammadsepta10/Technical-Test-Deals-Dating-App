@@ -5,7 +5,7 @@ import { MediaService } from './media.service';
 import { AuthGuard } from '@common/guards/auth.guard';
 import { RoleGuard } from '@common/guards/role.guard';
 import { Roles } from '@common/decorators/role.decorator';
-import { ApproveMediaDTO, ApproveNewsDTO, ListMediaDTO, NewsItemsDTO, SubmitNewsDTO } from './media.dto';
+import { ApproveMediaDTO, ApproveNewsDTO, CartDto, ListMediaDTO, NewsItemsDTO, SubmitNewsDTO } from './media.dto';
 import { ApproveMediaPipe, ApproveNewsPipe, GenerateInvoicePipe, ListMediaPipe } from './media.pipe';
 import { User } from '@common/decorators/param.user.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -66,10 +66,16 @@ export class MediaController {
     return this.mediaService.generateInvoice(param, user);
   }
 
+  @Get('/cart')
+  @UseGuards(AuthGuard, RoleGuard)
+  async cart(@Query() param: CartDto, @User() user, @Access() role) {
+    return this.mediaService.cart(param, user, role);
+  }
+
   @Get('/news')
-  @UseGuards(AuthGuard)
-  async listNews(@Query(ListMediaPipe) param: ListMediaDTO) {
-    return this.mediaService.listNews(param);
+  @UseGuards(AuthGuard, RoleGuard)
+  async listNews(@Query(ListMediaPipe) param: ListMediaDTO, @User() user, @Access() role) {
+    return this.mediaService.listNews(param, user, role);
   }
 
   @Get('/news/:id')

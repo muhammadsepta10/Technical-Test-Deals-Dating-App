@@ -30,13 +30,40 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
       : ` AND (news_verification.title LIKE '%${search}%' OR news_verification.desc LIKE '%${search}%' OR user_journalist.journalist_id LIKE '%${search}%')`;
   }
 
+  private _whereUser(userId: number) {
+    return userId ? ` AND (news_verification."createdById" = ${userId})` : '';
+  }
+
+  async cart(userId?: number) {
+    const syntax = `SELECT SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification WHERE 1=1${this._whereUser(
+      userId
+    )}
+`;
+    return this.query(syntax, []).then(v => v?.[0] || {});
+  }
+
+  async cartPerMonth(year: string, userId?: number) {
+    const syntax = `SELECT DATE_TRUNC('month', news_verification.created_at) AS month, SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification WHERE TO_CHAR(news_verification.created_at,'YYYY') = '${year}'${this._whereUser(
+      userId
+    )} GROUP BY month ORDER BY month;`;
+    return this.query(syntax, []);
+  }
+
   async list(param: ListMediaDTO) {
-    const syntax = `SELECT user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'Verified' WHEN news_verification.status = 2 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification,user_journalist WHERE news_verification."userJournalistId" = user_journalist.id ${this._whereDate({ startDate: param.startDate, endDate: param.endDate })}${this._whereKeys(param?.search)}${this._whereStatus(param.status)} ORDER BY news_verification.created_at DESC LIMIT ${param.limit} OFFSET ${param.page * param.limit}`;
+    const syntax = `SELECT user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'Verified' WHEN news_verification.status = 2 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification,user_journalist WHERE news_verification."userJournalistId" = user_journalist.id ${this._whereDate(
+      { startDate: param.startDate, endDate: param.endDate }
+    )}${this._whereKeys(param?.search)}${this._whereStatus(
+      param.status
+    )} ORDER BY news_verification.created_at DESC LIMIT ${param.limit} OFFSET ${
+      param.page * param.limit
+    }${this._whereUser(param.userId)}`;
     return this.query(syntax, []);
   }
 
   async countData(param: ListMediaDTO): Promise<number> {
-    const syntax = `SELECT count(1) cnt from news_verification,user_journalist WHERE news_verification."userJournalistId" = user_journalist.id ${this._whereDate({ startDate: param.startDate, endDate: param.endDate })}${this._whereKeys(param?.search)}${this._whereStatus(param.status)}`;
+    const syntax = `SELECT count(1) cnt from news_verification,user_journalist WHERE news_verification."userJournalistId" = user_journalist.id ${this._whereDate(
+      { startDate: param.startDate, endDate: param.endDate }
+    )}${this._whereKeys(param?.search)}${this._whereStatus(param.status)}`;
     return this.query(syntax, []).then(v => +v?.[0]?.cnt || 0);
   }
 

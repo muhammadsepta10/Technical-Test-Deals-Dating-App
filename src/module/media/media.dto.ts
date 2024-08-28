@@ -13,6 +13,13 @@ export class ListMediaDTO {
   startDate: string;
   @ApiProperty({ required: false })
   endDate: string;
+  userId?: number;
+}
+
+export class CartDto {
+  @ApiProperty()
+  year: string;
+  userId?: number;
 }
 
 export class ApproveMediaDTO {
