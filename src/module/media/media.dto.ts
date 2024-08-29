@@ -13,6 +13,8 @@ export class ListMediaDTO {
   startDate: string;
   @ApiProperty({ required: false })
   endDate: string;
+  @ApiProperty({ required: false })
+  isInvoice: number;
   userId?: number;
 }
 

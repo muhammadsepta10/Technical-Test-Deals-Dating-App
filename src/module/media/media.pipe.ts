@@ -10,7 +10,8 @@ export class ListMediaPipe extends JoiValidationPipe {
       page: Joi.number().default(0).optional(),
       status: Joi.number().default(-1).optional(),
       startDate: Joi.date().iso().default('').optional(),
-      endDate: Joi.date().iso().default('').optional()
+      endDate: Joi.date().iso().default('').optional(),
+      isInvoice: Joi.number().default(-1).optional()
     });
   }
 }
