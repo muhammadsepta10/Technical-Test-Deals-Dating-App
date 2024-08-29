@@ -50,7 +50,7 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   }
 
   async list(param: ListMediaDTO) {
-    const syntax = `SELECT user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'Verified' WHEN news_verification.status = 2 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification,user_journalist WHERE news_verification."userJournalistId" = user_journalist.id ${this._whereDate(
+    const syntax = `SELECT (CASE WHEN news_invoice."newsVerificationId" IS NULL THEN 0 ELSE 1 END) "isInvoice",user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'Verified' WHEN news_verification.status = 2 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id LEFT JOIN news_invoice ON news_invoice."newsVerificationId" = news_verification.id WHERE 1=1 ${this._whereDate(
       { startDate: param.startDate, endDate: param.endDate }
     )}${this._whereKeys(param?.search)}${this._whereStatus(param.status)}${this._whereUser(
       param.userId
