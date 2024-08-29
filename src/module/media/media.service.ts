@@ -547,11 +547,12 @@ export class MediaService {
   }
 
   async cart(param: CartDto, userId: number, role) {
+    param.userId = userId;
     const roleActions = {
       admin: this._cartAdmin.bind(this),
-      supplier: this._cartUser.bind(this)
+      journalist: this._cartUser.bind(this)
     };
-    return roleActions[role](param, userId);
+    return roleActions[role](param);
   }
 
   async submitNews(param: SubmitNewsDTO, files: Express.Multer.File[], userId: number) {

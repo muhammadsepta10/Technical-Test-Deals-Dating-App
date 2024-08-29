@@ -43,7 +43,7 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   }
 
   async cart(userId?: number) {
-    const syntax = `SELECT SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification WHERE 1=1${this._whereUser(
+    const syntax = `SELECT SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id WHERE 1=1${this._whereUser(
       userId
     )}
 `;
@@ -51,7 +51,7 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   }
 
   async cartPerMonth(year: string, userId?: number) {
-    const syntax = `SELECT DATE_TRUNC('month', news_verification.created_at) AS month, SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification WHERE TO_CHAR(news_verification.created_at,'YYYY') = '${year}'${this._whereUser(
+    const syntax = `SELECT DATE_TRUNC('month', news_verification.created_at) AS month, SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id WHERE TO_CHAR(news_verification.created_at,'YYYY') = '${year}'${this._whereUser(
       userId
     )} GROUP BY month ORDER BY month;`;
     return this.query(syntax, []);
