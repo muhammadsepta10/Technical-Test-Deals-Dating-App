@@ -31,7 +31,7 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   }
 
   private _whereUser(userId: number) {
-    return userId ? ` AND (news_verification."createdById" = ${userId})` : '';
+    return userId ? ` AND (user_journalist."userId" = ${userId})` : '';
   }
 
   async cart(userId?: number) {
@@ -52,11 +52,9 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   async list(param: ListMediaDTO) {
     const syntax = `SELECT user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'Verified' WHEN news_verification.status = 2 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification,user_journalist WHERE news_verification."userJournalistId" = user_journalist.id ${this._whereDate(
       { startDate: param.startDate, endDate: param.endDate }
-    )}${this._whereKeys(param?.search)}${this._whereStatus(
-      param.status
-    )} ORDER BY news_verification.created_at DESC LIMIT ${param.limit} OFFSET ${
-      param.page * param.limit
-    }${this._whereUser(param.userId)}`;
+    )}${this._whereKeys(param?.search)}${this._whereStatus(param.status)}${this._whereUser(
+      param.userId
+    )} ORDER BY news_verification.created_at DESC LIMIT ${param.limit} OFFSET ${param.page * param.limit}`;
     return this.query(syntax, []);
   }
 

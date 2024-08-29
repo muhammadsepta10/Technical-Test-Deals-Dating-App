@@ -18,7 +18,7 @@ export class GuestBookRepository extends Repository<GuestBook> {
     if (startDate && endDate && dayjs(startDate, 'YYYY-MM-DD').isValid() && dayjs(endDate, 'YYYY-MM-DD').isValid()) {
       startDate = dayjs(startDate).format('YYYY-MM-DD');
       endDate = dayjs(endDate).format('YYYY-MM-DD');
-      return ` AND (TO_CHAR(created_at,'YYYY-MM-DD') BETWEEN '${startDate}' AND '${endDate}')`;
+      return ` AND (TO_CHAR(guest_book.start_time,'YYYY-MM-DD') BETWEEN '${startDate}' AND '${endDate}')`;
     }
     return '';
   }
@@ -36,6 +36,9 @@ export class GuestBookRepository extends Repository<GuestBook> {
                       wa_no "waNo",
                       guest_email email,
                       guest_book.status,
+                      TO_CHAR(guest_book.start_time,'YYYY-MM-DD HH24:MI:SS') "startTime",
+                      TO_CHAR(guest_book.end_time,'YYYY-MM-DD HH24:MI:SS') "endTime",
+                      guest_book.pic,
                       (
                         CASE WHEN status = 0 THEN
                           'Process'
@@ -48,9 +51,50 @@ export class GuestBookRepository extends Repository<GuestBook> {
                         END) "statusText"
                     FROM
                       guest_book 
-                    WHERE 1=1${this._whereDate({ endDate: param.endDate, startDate: param.startDate })}${this._whereStatus(param.status)}${this._whereKeys(param.search)} 
+                    WHERE 1=1${this._whereDate({
+                      endDate: param.endDate,
+                      startDate: param.startDate
+                    })}${this._whereStatus(param.status)}${this._whereKeys(param.search)} 
                         LIMIT ${param.limit} OFFSET ${param.page * param.limit}`;
     return this.query(syntax);
+  }
+
+  async detail(id: string) {
+    const syntax = `SELECT
+	guest_book.uuid id,
+	guest_book.instance_name "instanceName",
+	guest_book.wa_no "waNo",
+	COALESCE("approvedBy"."name",'') "approvedBy",
+	TO_CHAR(guest_book.created_at, 'YYYY-MM-DD HH24:MI:SS') "createdAt",
+	guest_book.guest_email "email",
+	guest_book.guest_name "name",
+	guest_book.pic "pic",
+	guest_book.purpose,
+	guest_book.status,
+	TO_CHAR(guest_book.approved_at, 'YYYY-MM-DD HH24:MI:SS') "approvedAt",
+	(
+		CASE WHEN guest_book.status = 0 THEN
+			'Process'
+		WHEN guest_book.status = 1 THEN
+			'Approved'
+		WHEN guest_book.status = 2 THEN
+			'REJECTED'
+		ELSE
+			'Process'
+		END) "statusText",
+	TO_CHAR(guest_book.start_time, 'YYYY-MM-DD HH24:MI:SS') "startTime",
+	TO_CHAR(guest_book.end_time, 'YYYY-MM-DD HH24:MI:SS') "endTime",
+	"workUnit"."name" "workUnit",
+	"instanceCategory"."name" "isntanceCategory"
+FROM
+	guest_book
+	LEFT JOIN "user" "approvedBy" ON "approvedBy".id = guest_book. "approvedById"
+	JOIN master_work_unit "workUnit" ON "workUnit".id = guest_book. "masterWorkUnitId"
+	JOIN master_instance_category "instanceCategory" ON "instanceCategory".id = guest_book. "masterInstanceCategoryId"
+WHERE
+	guest_book.uuid = $1`;
+    const data = await this.query(syntax, [id]);
+    return data?.[0] || null;
   }
 
   async countData(param: ListMediaDTO) {
@@ -58,7 +102,10 @@ export class GuestBookRepository extends Repository<GuestBook> {
                       COUNT(1) cnt
                     FROM
                       guest_book 
-                    WHERE 1=1${this._whereDate({ endDate: param.endDate, startDate: param.startDate })}${this._whereStatus(param.status)}${this._whereKeys(param.search)}`;
+                    WHERE 1=1${this._whereDate({
+                      endDate: param.endDate,
+                      startDate: param.startDate
+                    })}${this._whereStatus(param.status)}${this._whereKeys(param.search)}`;
     return this.query(syntax).then(v => +v?.[0]?.cnt || 0);
   }
 }
