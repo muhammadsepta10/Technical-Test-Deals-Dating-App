@@ -345,7 +345,6 @@ export class MediaService {
         html_template = html_template.replace(`{{${index + 1}}}`, param);
       }
       const invoicePdf = await this.commonService.htmlToPdf(html_template, '/invoice/');
-      console.log(invoicePdf);
       await this.invoiceRepository
         .createQueryBuilder('invoice')
         .update()
@@ -454,6 +453,7 @@ export class MediaService {
 
   private async _listNewsAdmin(param: ListMediaDTO) {
     param.page = param.page >= 1 ? param.page - 1 : param.page;
+    param.userId = undefined;
     const currentPage = param.page < 1 ? 1 : param.page + 1;
     const data = await this.newsVerificationRepository.list(param);
     const totalData = await this.newsVerificationRepository.countData(param);
@@ -467,7 +467,6 @@ export class MediaService {
   }
 
   private async _listNewsUser(param: ListMediaDTO) {
-    param.userId = 0;
     param.page = param.page >= 1 ? param.page - 1 : param.page;
     const currentPage = param.page < 1 ? 1 : param.page + 1;
     const data = await this.newsVerificationRepository.list(param);
@@ -484,9 +483,10 @@ export class MediaService {
   async listNews(param: ListMediaDTO, user, role) {
     const roleActions = {
       admin: this._listNewsAdmin.bind(this),
-      supplier: this._listNewsUser.bind(this)
+      journalist: this._listNewsUser.bind(this)
     };
-    return roleActions[role][{ ...param, userId: user }];
+    const action = roleActions[role]({ ...param, userId: user });
+    return action;
   }
 
   async detailNews(id: string) {
