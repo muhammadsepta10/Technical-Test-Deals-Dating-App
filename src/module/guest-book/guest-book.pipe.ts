@@ -1,7 +1,20 @@
 import { JoiValidationPipe } from '@common/pipes/joi-validation.pipe';
 import * as Joi from 'joi';
-import { requestGuestDTO } from './guest-book.dto';
+import { approveGuestDTO, requestGuestDTO } from './guest-book.dto';
 import * as dayjs from 'dayjs';
+
+export class ApproveGuestBookPipe extends JoiValidationPipe {
+  public buildSchema(): Joi.Schema {
+    return Joi.object<approveGuestDTO>({
+      guestBookId: Joi.string().uuid().required(),
+      status: Joi.number().valid(1, 2).required(),
+      reason: Joi.when('status', {
+        is: 2,
+        then: Joi.number().required()
+      })
+    });
+  }
+}
 
 export class requestGuestPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
@@ -14,7 +27,9 @@ export class requestGuestPipe extends JoiValidationPipe {
         .required()
         .custom((value, helpers) => {
           if (isNaN(Number(value))) {
-            return helpers.error('custom.guestWaNoInvalid', { message: '"guestWaNo" must be a valid number' });
+            return helpers.error('custom.guestWaNoInvalid', {
+              message: '"guestWaNo" must be a valid number'
+            });
           }
           return value;
         }),
@@ -28,7 +43,9 @@ export class requestGuestPipe extends JoiValidationPipe {
       .custom((value, helpers) => {
         const { startTime, endTime } = value;
         if (dayjs(startTime).unix() < dayjs().add(3, 'day').unix()) {
-          return helpers.error('custom.startTimeMin', { message: '"startTime" minimum is h+3' });
+          return helpers.error('custom.startTimeMin', {
+            message: '"startTime" minimum is h+3'
+          });
         }
         if (dayjs(startTime).unix() > dayjs(endTime).unix()) {
           return helpers.error('custom.startTimeEndTime', {

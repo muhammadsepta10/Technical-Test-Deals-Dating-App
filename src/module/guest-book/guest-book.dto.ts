@@ -28,4 +28,6 @@ export class approveGuestDTO {
   guestBookId: string;
   @ApiProperty()
   status: number;
+  @ApiProperty({ required: false })
+  reason: number;
 }

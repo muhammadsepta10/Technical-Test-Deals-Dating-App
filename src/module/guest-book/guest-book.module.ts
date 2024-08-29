@@ -9,6 +9,7 @@ import { MasterWorkUnitDbModule } from 'src/db/project-db/entity/master-work-uni
 import { AppConfigModule } from '@common/config/api/config.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { MasterModule } from '../master/master.module';
+import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
 
 @Module({
   providers: [GuestBookService],
@@ -21,7 +22,8 @@ import { MasterModule } from '../master/master.module';
     MasterWorkUnitDbModule,
     AppConfigModule,
     MailerModule,
-    MasterModule
+    MasterModule,
+    ProjectDbConfigModule
   ]
 })
 export class GuestBookModule {}
