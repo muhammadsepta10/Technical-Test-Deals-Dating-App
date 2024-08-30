@@ -43,7 +43,7 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   }
 
   async cart(userId?: number) {
-    const syntax = `SELECT SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id WHERE 1=1${this._whereUser(
+    const syntax = `SELECT SUM(CASE WHEN news_verification.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN news_verification.status = 1 THEN 1 ELSE 0 END)::INTEGER AS "onVerif", SUM(CASE WHEN news_verification.status = 2 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN news_verification.status = 3 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id WHERE 1=1${this._whereUser(
       userId
     )}
 `;
@@ -58,7 +58,7 @@ export class NewsVerificationRepository extends Repository<NewsVerification> {
   }
 
   async list(param: ListMediaDTO) {
-    const syntax = `SELECT (CASE WHEN news_invoice."newsVerificationId" IS NULL THEN 0 ELSE 1 END) "isInvoice",user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'Verified' WHEN news_verification.status = 2 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id LEFT JOIN news_invoice ON news_invoice."newsVerificationId" = news_verification.id WHERE 1=1 ${this._whereDate(
+    const syntax = `SELECT (CASE WHEN news_invoice."newsVerificationId" IS NULL THEN 0 ELSE 1 END) "isInvoice",user_journalist.journalist_id "mediaId",user_journalist.media_name,  news_verification.uuid as id, news_verification.title, news_verification."desc", news_verification.status, (CASE WHEN news_verification.status = 0 THEN 'Unverif' WHEN news_verification.status = 1 THEN 'On Verif' WHEN news_verification.status = 2 THEN 'Verified' WHEN news_verification.status = 3 THEN 'Rejected' ELSE '' END) "statusText", TO_CHAR(news_verification.created_at,'YYYY-MM-DD') "createdDate" from news_verification JOIN user_journalist ON news_verification."userJournalistId" = user_journalist.id LEFT JOIN news_invoice ON news_invoice."newsVerificationId" = news_verification.id WHERE 1=1 ${this._whereDate(
       { startDate: param.startDate, endDate: param.endDate }
     )}${this._whereKeys(param?.search)}${this._whereStatus(
       param.status

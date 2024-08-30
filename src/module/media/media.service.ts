@@ -288,8 +288,8 @@ export class MediaService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const currentDate = dayjs().locale('ID').format('DD MMMM YYYY');
-      const duedate = dayjs().add(INVOICE_DUEDATE, 'day').locale('ID').format('DD MMMM YYYY');
+      const currentDate = dayjs().format('YYYY-MM-DD HH:mm:ss');
+      const duedate = dayjs().add(INVOICE_DUEDATE, 'day').format('YYYY-MM-DD HH:mm:ss');
       const invoice = await this.invoiceRepository
         .createQueryBuilder('invoice')
         .insert()
@@ -298,10 +298,11 @@ export class MediaService {
           due_date: duedate,
           generatedById: userId
         })
-        .returning(['id'])
+        .returning(['id', 'uuid'])
         .setQueryRunner(queryRunner)
         .execute();
       const invoiceId = invoice.raw[0].id;
+      const invoiceUid = invoice.raw[0].uuid;
       const {
         html: itemHtml,
         userJournalId,
@@ -326,8 +327,8 @@ export class MediaService {
       const { media_name, address, account_no, bank_account_name } = userJournalist;
       const templateParam = [
         invoiceNo,
-        currentDate,
-        duedate,
+        dayjs(currentDate).locale('id').format('DD MMMM YYYY'),
+        dayjs(duedate).locale('id').format('DD MMMM YYYY'),
         media_name,
         address,
         INVOICE_TARGET_NAME,
@@ -366,6 +367,11 @@ export class MediaService {
         .setQueryRunner(queryRunner)
         .execute();
       await queryRunner.commitTransaction();
+      return {
+        id: invoiceUid,
+        pdf: invoicePdf,
+        html: html_template
+      };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (!error?.response || !error?.status) {
