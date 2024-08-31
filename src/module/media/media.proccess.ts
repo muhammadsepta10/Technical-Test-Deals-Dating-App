@@ -24,12 +24,15 @@ export class ApprovedSimaspro {
     private mailerService: MailerService,
     private projectDbConfigService: ProjectDbConfigService
   ) {}
-  @InjectRepository(UserJournalistRepository) private userJournalistRepository: UserJournalistRepository;
-  @InjectRepository(UserJournalistDocRepository) private userJournalistDocRepository: UserJournalistDocRepository;
+  @InjectRepository(UserJournalistRepository)
+  private userJournalistRepository: UserJournalistRepository;
+  @InjectRepository(UserJournalistDocRepository)
+  private userJournalistDocRepository: UserJournalistDocRepository;
   @InjectRepository(UserJournalistHistoryRepository)
   private userJournalistHistoryRepository: UserJournalistHistoryRepository;
   @InjectRepository(UserRepository) private userRepository: UserRepository;
-  @InjectRepository(UserAccessRepository) private userAccessRepository: UserAccessRepository;
+  @InjectRepository(UserAccessRepository)
+  private userAccessRepository: UserAccessRepository;
   @InjectRepository(JournalistVerificationCodeRepository)
   private journalistVerificationCodeRepository: JournalistVerificationCodeRepository;
 
@@ -85,7 +88,12 @@ export class ApprovedSimaspro {
           .createQueryBuilder('userJournalist')
           .update()
           .where('id = :id', { id: userJournalId })
-          .set({ status: 2, journalist_id: journalistId, userId: user.identifiers[0].id, approvedById: userId })
+          .set({
+            status: 2,
+            journalist_id: journalistId,
+            userId: user.identifiers[0].id,
+            approvedById: userId
+          })
           .setQueryRunner(queryRunner)
           .returning(['userJournalist.sortId', 'userJournalist.created_at'])
           .execute();
@@ -116,7 +124,7 @@ export class ApprovedSimaspro {
           approved_at: dayJs().format('YYYY-MM-DD HH:mm:ss'),
           approvedById: userId,
           createdById: userId,
-          status,
+          status: status == 1 ? 2 : status == 2 ? 3 : 1,
           userJournalistId: userJournalId
         });
       await queryRunner.commitTransaction();
@@ -163,7 +171,11 @@ export class ApprovedSimaspro {
         await this.journalistVerificationCodeRepository
           .createQueryBuilder()
           .insert()
-          .values({ verification_code: code, status: 0, userJournalistId: journalistId })
+          .values({
+            verification_code: code,
+            status: 0,
+            userJournalistId: journalistId
+          })
           .setQueryRunner(queryRunner)
           .execute()
           .then(() => {

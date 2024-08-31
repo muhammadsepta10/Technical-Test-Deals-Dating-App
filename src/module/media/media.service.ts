@@ -324,19 +324,20 @@ export class MediaService {
         ])
         .getOne();
       const masterBank = userJournalist?.masterBank;
-      const { media_name, address, account_no, bank_account_name } = userJournalist;
+      const { media_name, address, account_no, bank_account_name, whatsapp_no, email } = userJournalist;
+      const fromAddress = `${address},<br>No. Hp : ${whatsapp_no},<br>Email : ${email}`;
       const templateParam = [
         invoiceNo,
         dayjs(currentDate).locale('id').format('DD MMMM YYYY'),
         dayjs(duedate).locale('id').format('DD MMMM YYYY'),
         media_name,
-        address,
+        fromAddress,
         INVOICE_TARGET_NAME,
         INVOICE_TARGET_ADDRESS,
         itemHtml,
-        subtotal,
-        taxAmount,
-        grandTotal,
+        `${this.commonService.currencyFormat(subtotal, 'id-ID', 'IDR')}`,
+        `${this.commonService.currencyFormat(taxAmount, 'id-ID', 'IDR')}`,
+        `${this.commonService.currencyFormat(grandTotal, 'id-ID', 'IDR')}`,
         masterBank.name,
         account_no,
         bank_account_name
@@ -350,7 +351,7 @@ export class MediaService {
         .createQueryBuilder('invoice')
         .update()
         .set({
-          from_address: address,
+          from_address: fromAddress,
           from_name: media_name,
           to_name: INVOICE_TARGET_NAME,
           to_address: INVOICE_TARGET_ADDRESS,

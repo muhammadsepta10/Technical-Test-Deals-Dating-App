@@ -32,7 +32,7 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
   async listJournalist(param: ListJournalistParamDTO) {
     const { limit, search, page, status, startDate, endDate } = param;
     const skip = page * limit;
-    const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'Verified' WHEN status = 2 THEN 'Rejected' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId", TO_CHAR(created_at,'YYYY-MM-DD HH24:MI:SS.MS') "createdDate" FROM user_journalist WHERE 1=1${this._whereStatus(
+    const syntax = `SELECT uuid as id,media_name,whatsapp_no,email,status,(CASE WHEN status = 0 THEN 'Unverif' WHEN status = 1 THEN 'On Verif' WHEN status = 2 THEN 'Verified' WHEN status = 3 THEN 'Rejected' ELSE '' END) "statusText", COALESCE(journalist_id,'') "mediaId", TO_CHAR(created_at,'YYYY-MM-DD HH24:MI:SS.MS') "createdDate" FROM user_journalist WHERE 1=1${this._whereStatus(
       status
     )}${this._whereKeys(search)}${this._whereDate({
       startDate,
@@ -50,12 +50,12 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
   }
 
   async cartPerMonth(year: string) {
-    const syntax = `SELECT TO_CHAR(user_journalist.created_at,'YYYY-MM') AS month, SUM(CASE WHEN user_journalist.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN user_journalist.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN user_journalist.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM user_journalist WHERE TO_CHAR(user_journalist.created_at,'YYYY') = '${year}' GROUP BY 	month ORDER BY month;`;
+    const syntax = `SELECT TO_CHAR(user_journalist.created_at,'YYYY-MM') AS month, SUM(CASE WHEN user_journalist.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN user_journalist.status = 2 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN user_journalist.status = 3 THEN 1 ELSE 0 END)::INTEGER AS rejected,SUM(CASE WHEN user_journalist.status = 1 THEN 1 ELSE 0 END)::INTEGER AS onVerif FROM user_journalist WHERE TO_CHAR(user_journalist.created_at,'YYYY') = '${year}' GROUP BY 	month ORDER BY month;`;
     return this.query(syntax, []);
   }
 
   async cart() {
-    const syntax = `SELECT SUM(CASE WHEN user_journalist.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN user_journalist.status = 1 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN user_journalist.status = 2 THEN 1 ELSE 0 END)::INTEGER AS rejected FROM user_journalist WHERE 1 = 1;`;
+    const syntax = `SELECT SUM(CASE WHEN user_journalist.status = 0 THEN 1 ELSE 0 END)::INTEGER AS unverified, SUM(CASE WHEN user_journalist.status = 2 THEN 1 ELSE 0 END)::INTEGER AS verified, SUM(CASE WHEN user_journalist.status = 3 THEN 1 ELSE 0 END)::INTEGER AS rejected,SUM(CASE WHEN user_journalist.status = 1 THEN 1 ELSE 0 END)::INTEGER AS onVerif FROM user_journalist WHERE 1 = 1;`;
     return this.query(syntax, []).then(v => v?.[0] || {});
   }
 
@@ -66,7 +66,7 @@ export class UserJournalistRepository extends Repository<UserJournalist> {
       user_journalist.whatsapp_no,
       user_journalist.email,
       user_journalist.status,
-      (CASE WHEN user_journalist.status = 0 THEN 'Unverif' WHEN user_journalist.status = 1 THEN 'Verified' WHEN user_journalist.status = 2 THEN 'Rejected' ELSE '' END) "statusText",
+      (CASE WHEN user_journalist.status = 0 THEN 'Unverif' WHEN user_journalist.status = 1 THEN 'On Verif' WHEN user_journalist.status = 2 THEN 'Verified' WHEN user_journalist.status = 3 THEN 'Rejected' ELSE '' END) "statusText",
       COALESCE(user_journalist.journalist_id,'') "mediaId",
       COALESCE(TO_CHAR(user_journalist.created_at, 'YYYY-MM-DD HH24:MI:SS'),'') AS created_at,
       COALESCE(TO_CHAR(user_journalist.approved_at, 'YYYY-MM-DD HH24:MI:SS'),'') AS approved_at,
