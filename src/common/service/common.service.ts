@@ -78,6 +78,13 @@ export class CommonService {
     return extension || 'unknown';
   }
 
+  currencyFormat(number, locale: string, currency: 'IDR' | 'USD') {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency
+    }).format(number);
+  }
+
   async htmlToPdf(htmlContent: string, path: string): Promise<string> {
     path = path.trim();
     path = path[0] == '/' ? path : `/${path}`;
