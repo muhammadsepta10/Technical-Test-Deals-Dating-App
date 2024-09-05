@@ -51,7 +51,8 @@ export class MasterService {
       const menuDb = await this.masterMenuRepository
         .createQueryBuilder('menu')
         .innerJoin('menu.accessDet', 'accessDet')
-        .where('accessDet.accessId = :accessId AND menu.status = 1', {
+        .innerJoin('accessDet.access', 'access')
+        .where('access.code = :accessId AND menu.status = 1', {
           accessId
         })
         .select('menu.id', 'id')
@@ -69,6 +70,7 @@ export class MasterService {
         .addSelect('accessDet.m_nego', 'm_nego')
         .orderBy('menu.sort', 'ASC')
         .getRawMany();
+      console.log(menuDb);
       menu = this._buildMenuTree(menuDb);
       await this.cacheService.set(cacheKey, JSON.stringify(menu), menu?.length < 1 ? 1 : 3600);
     }
