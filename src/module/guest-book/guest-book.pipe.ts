@@ -42,7 +42,7 @@ export class requestGuestPipe extends JoiValidationPipe {
     })
       .custom((value, helpers) => {
         const { startTime, endTime } = value;
-        if (dayjs(startTime).unix() < dayjs().add(3, 'day').unix()) {
+        if (dayjs(startTime).unix() < dayjs().add(2, 'day').unix()) {
           return helpers.error('custom.startTimeMin', {
             message: '"startTime" minimum is h+3'
           });
