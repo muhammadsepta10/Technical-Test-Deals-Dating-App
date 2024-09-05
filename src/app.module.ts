@@ -23,6 +23,7 @@ import { MasterModule } from './module/master/master.module';
 import { MailerModule } from './module/mailer/mailer.module';
 import { BullModule } from '@nestjs/bull';
 import { AppConfigService } from '@common/config/api/config.service';
+import { GuestBookModule } from './module/guest-book/guest-book.module';
 
 @Module({
   imports: [
@@ -72,7 +73,8 @@ import { AppConfigService } from '@common/config/api/config.service';
     UserModule,
     MediaModule,
     MasterModule,
-    MailerModule
+    MailerModule,
+    GuestBookModule
   ],
   controllers: [AppController],
   providers: [AppService]
