@@ -9,7 +9,8 @@ import { MasterService } from '../master/master.service';
 @Injectable()
 export class MailerService {
   constructor(
-    @InjectQueue('send-mail-simaspro') private sendMailQueue: Queue<SendMailDTO>,
+    @InjectQueue('send-mail-simaspro')
+    private sendMailQueue: Queue<SendMailDTO>,
     private masterService: MasterService
   ) {}
   async notifEmail(param: NotifEmailDTO) {
@@ -45,7 +46,9 @@ export class MailerService {
     if (html) {
       const existFile = existsSync(`${appRootPath}/assets/${html}`);
       if (existFile) {
-        html = readFileSync(`${appRootPath}/assets/${html}`, { encoding: 'utf8' });
+        html = readFileSync(`${appRootPath}/assets/${html}`, {
+          encoding: 'utf8'
+        });
       }
     }
     await this.sendMailQueue.add(

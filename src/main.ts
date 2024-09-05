@@ -27,8 +27,16 @@ async function bootstrap() {
   // SWAGGER CONFIG
   if (NODE_ENV?.toUpperCase() !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .addSecurity('auth', { name: 'Authorization', type: 'apiKey', in: 'header' })
-      .addSecurity('appAuth', { name: 'app-auth', type: 'apiKey', in: 'header' })
+      .addSecurity('auth', {
+        name: 'Authorization',
+        type: 'apiKey',
+        in: 'header'
+      })
+      .addSecurity('appAuth', {
+        name: 'app-auth',
+        type: 'apiKey',
+        in: 'header'
+      })
       .setTitle(`${NAME_PROGRAM} API`)
       .setVersion('1.0')
       .addTag(`${NAME_PROGRAM}`)
