@@ -56,7 +56,7 @@ export class GuestBookService {
       }
       // check approved
       await this._checkAlreadyGuest(startTime, endTime, pic, queryRunner);
-      await this.guestBookRepository
+      const guestBook = await this.guestBookRepository
         .createQueryBuilder('guestBook')
         .insert()
         .values({
@@ -73,9 +73,15 @@ export class GuestBookService {
           status: 0
         })
         .setQueryRunner(queryRunner)
+        .returning(['uuid'])
         .execute();
       // send email
-      await this._sendMail([`${this.appConfigService.WEB_BASE_URL}`], guestEmail, 'GUEST_REQUEST', null);
+      await this._sendMail(
+        [`${this.appConfigService.WEB_BASE_URL}/guest/${guestBook.raw[0].uuid}`],
+        guestEmail,
+        'GUEST_REQUEST',
+        null
+      );
       await queryRunner.commitTransaction();
       return { message: 'Cek email Anda' };
     } catch (error) {
