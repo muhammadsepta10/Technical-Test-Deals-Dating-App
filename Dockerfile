@@ -12,7 +12,6 @@ RUN npm i -g husky
 # Install dependencies
 RUN npm install
 
-
 # Copy all file to workdir
 COPY . .
 
@@ -38,33 +37,14 @@ ENV NODE_ENV=${NODE_ENV}
 # Log the current NODE_ENV to troubleshoot
 RUN echo "NODE_ENV is set to: $NODE_ENV"
 
-RUN npm i -g husky
-
-# Install necessary dependencies for running Chromium.
+# Install necessary dependencies for running `canvas`
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    libu2f-udev \
-    libvulkan1 \
-    libxshmfence1 \
-    wget \
-    --no-install-recommends \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
