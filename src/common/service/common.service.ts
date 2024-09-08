@@ -2,14 +2,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
 import * as bcrpyt from 'bcrypt';
 import { GeneralParameterRepository } from 'src/db/project-db/entity/general-parameter/general-parameter.repository';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { path as appRoot } from 'app-root-path';
 import { AppConfigService } from '@common/config/api/config.service';
 import { Injectable } from '@nestjs/common';
 import { CacheService } from 'src/module/cache/cache.service';
 import { DocumentDTO } from '@common/dto';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import puppeteer from 'puppeteer';
+import * as qrcode from 'qrcode';
+import { CanvasRenderingContext2D, createCanvas, loadImage } from 'canvas';
 
 @Injectable()
 export class CommonService {
@@ -32,6 +34,176 @@ export class CommonService {
     for (let i = length - frontText.length; i > 0; --i)
       result += afterRand[Math.floor(Math.random() * afterRand.length)];
     return result;
+  }
+
+  private _drawBatikLine(ctx: CanvasRenderingContext2D, x: number, y: number, cellSize: number) {
+    const amplitude = cellSize / 2;
+    const thickness = cellSize / 4; // Thicker line width
+    const steps = 10;
+
+    ctx.beginPath();
+    ctx.lineWidth = thickness;
+    ctx.lineCap = 'round'; // Rounded line caps for smooth edges
+
+    for (let i = 0; i <= steps; i++) {
+      const xx = x + (i * cellSize) / steps;
+      const yy = y + Math.sin((i * Math.PI * 2) / steps) * amplitude;
+      ctx.lineTo(xx, yy);
+    }
+
+    ctx.stroke();
+  }
+
+  // Helper function to draw an oval background
+  private _drawOval(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
+    ctx.beginPath();
+    ctx.ellipse(x + width / 2, y + height / 2, width / 2, height / 2, 0, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  private _drawWaterWave(ctx: CanvasRenderingContext2D, x: number, y: number, cellSize: number) {
+    const amplitude = cellSize / 2; // Amplitude of the wave
+    // const wavelength = cellSize * 2; // Wavelength of the wave
+    const steps = 10; // Number of steps for smoother curves
+
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const xx = x + (i * cellSize) / steps;
+      const yy = y + Math.sin((i * Math.PI * 2) / steps) * amplitude;
+      ctx.lineTo(xx, yy);
+    }
+    ctx.stroke();
+  }
+
+  private _drawRoundedSquare(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, radius: number) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + size, y, x + size, y + size, radius);
+    ctx.arcTo(x + size, y + size, x, y + size, radius);
+    ctx.arcTo(x, y + size, x, y, radius);
+    ctx.arcTo(x, y, x + size, y, radius);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  private _drawStain(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+    const stainRadius = size / 2;
+    const numberOfBlobs = Math.floor(Math.random() * 5) + 3; // Random number of blobs
+    for (let i = 0; i < numberOfBlobs; i++) {
+      const blobX = x + Math.random() * size;
+      const blobY = y + Math.random() * size;
+      const blobRadius = Math.random() * (stainRadius / 2) + stainRadius / 4;
+      ctx.beginPath();
+      ctx.arc(blobX, blobY, blobRadius, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
+
+  async generateQrCode({
+    content,
+    style
+  }: {
+    content: string;
+    style: 'classic' | 'rounded' | 'wave' | 'stain' | 'batik';
+  }) {
+    const qrSize = 500; // Size of the QR code
+    const qrMargin = 10;
+    const basePath = `${appRoot}/../public/qr`;
+    if (!existsSync(basePath)) {
+      mkdirSync(basePath, { recursive: true });
+    }
+    const filename = `qr${await this.randString(5, '1234567890QWERTYUIOPLKJHGFDSAZXCVBNM', '')}${new Date().getTime()}`;
+
+    const options: qrcode.QRCodeRenderersOptions = {
+      errorCorrectionLevel: 'H',
+      margin: 1
+    };
+
+    // Generate QR code data
+    qrcode.toDataURL(content, options, async (err, url) => {
+      if (err) throw err;
+
+      // Create a canvas
+      const canvas = createCanvas(qrSize, qrSize);
+      const ctx = canvas.getContext('2d');
+      await loadImage(url);
+
+      const usableSize = qrSize - qrMargin * 2; // Area available for the QR code, excluding the margins
+      const cellSize = usableSize / 29;
+      ctx.clearRect(0, 0, qrSize, qrSize);
+
+      const qrCodeData = qrcode.create(content, { errorCorrectionLevel: 'H' });
+      const modules = qrCodeData.modules;
+      const moduleCount = modules.size;
+
+      // Set QR code background color
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, qrSize, qrSize);
+
+      // Draw the QR code based on the selected style
+      ctx.fillStyle = '#000000'; // QR code dots color
+      for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+          if (modules.get(row, col)) {
+            const x = qrMargin + col * cellSize;
+            const y = qrMargin + row * cellSize;
+
+            switch (style) {
+              case 'classic':
+                ctx.fillRect(x, y, cellSize, cellSize);
+                break;
+              case 'rounded':
+                this._drawRoundedSquare(ctx, x, y, cellSize, cellSize / 3); // Rounded corner
+                break;
+              case 'batik':
+                this._drawWaterWave(ctx, x, y, cellSize); // Water wave pattern
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(Math.PI / 2);
+                this._drawWaterWave(ctx, 0, 0, cellSize); // Rotate to draw vertical waves
+                ctx.restore();
+                break;
+              case 'wave':
+                // this._drawWaterWave(ctx, x, y, cellSize); // Water wave pattern
+                // ctx.save();
+                // ctx.translate(x, y);
+                // ctx.rotate(Math.PI / 2);
+                // this._drawWaterWave(ctx, 0, 0, cellSize); // Rotate to draw vertical waves
+                // ctx.restore();
+                // break;
+                this._drawBatikLine(ctx, x, y, cellSize); // Batik-like wavy lines
+                break;
+              case 'stain':
+                this._drawStain(ctx, x + cellSize / 2, y + cellSize / 2, cellSize); // Stain-like irregular blobs
+                break;
+            }
+          }
+        }
+      }
+
+      // Load the icon and calculate positioning
+      const iconSize = qrSize / 5; // Icon size
+      const iconImage = await loadImage(`${appRoot}/assets/icon.png`);
+      const iconX = (qrSize - iconSize) / 2;
+      const iconY = (qrSize - iconSize) / 2;
+
+      // Draw a background behind the icon using the QR code background color
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(iconX, iconY, iconSize, iconSize);
+      // this._drawRoundedRectangle(ctx, iconX, iconY, iconSize, iconSize);
+
+      // Draw the icon on top of the background
+      ctx.drawImage(iconImage, iconX, iconY, iconSize, iconSize);
+
+      // Save the final image with the icon and selected QR code style
+      const finalPath = join(basePath, `${filename}.png`);
+      const out = createWriteStream(finalPath);
+      const stream = canvas.createPNGStream();
+      stream.pipe(out);
+      out.on('finish', () => console.log(`QR code with ${style} style saved as ${finalPath}`));
+    });
+
+    return `${this.appConfig.BASE_URL}/qr/${filename}.png`;
   }
 
   checkFileExtension(base64String): string {
@@ -164,6 +336,7 @@ export class CommonService {
       }, ms);
     });
   }
+
   encrypt(text: string, id: string): string {
     const { iv, key } = this._generateKeyAndIVFromID(id);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
