@@ -19,10 +19,13 @@ export class Notification {
   @Column({ type: 'varchar', length: 255, default: '' })
   title: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true, default: null })
   content: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true, default: null })
+  email: string;
+
+  @Column({ type: 'text', nullable: true, default: null })
   html: string;
 
   @Column({
