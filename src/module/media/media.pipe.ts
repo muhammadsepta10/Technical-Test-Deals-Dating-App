@@ -35,7 +35,7 @@ export class GenerateInvoicePipe extends JoiValidationPipe {
     return Joi.array().items(
       Joi.object<NewsItemsDTO>({
         newsId: Joi.string().uuid().required(),
-        price: Joi.number().min(1).required(),
+        price: Joi.number().min(0).required(),
         quantity: Joi.number().min(1)
       })
     );
