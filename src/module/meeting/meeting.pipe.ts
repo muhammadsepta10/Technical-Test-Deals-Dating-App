@@ -49,7 +49,8 @@ export class SubmitMeetingPipe extends JoiValidationPipe {
 export class CheckinPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
     return Joi.object<CheckinDTO>({
-      invitationNo: Joi.string().required().trim()
+      participantId: Joi.string().uuid().required().trim(),
+      meetingId: Joi.string().uuid().required().trim()
     });
   }
 }

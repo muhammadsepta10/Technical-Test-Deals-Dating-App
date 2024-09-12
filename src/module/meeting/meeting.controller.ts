@@ -36,4 +36,9 @@ export class MeetingController {
   detailMeeting(@Param('id') id: string) {
     return this.meetingService.detailMeeting(id);
   }
+
+  @Get('/participant/:id')
+  participantDetail(@Param('id') id: string) {
+    return this.meetingService.participantDetail(id);
+  }
 }

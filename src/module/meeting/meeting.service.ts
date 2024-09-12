@@ -67,7 +67,7 @@ export class MeetingService {
       const meetingId = meeting.id;
       const meetingUid = meeting.uuid;
       const qrCode = await this.commonService.generateQrCode({
-        content: `${this.appConfigService.WEB_BASE_URL}/meeting/${meetingUid}`,
+        content: meetingUid,
         style: 'stain'
       });
       await this.guestMeetingRepository
@@ -87,7 +87,7 @@ export class MeetingService {
         for (let index = 0; index < participants.length; index++) {
           const { email, instanceName, name } = participants[index];
           const waNo = this.commonService.changePhone(participants[index].waNo, '62');
-          const participantId = await this.guestMeetingParticipantRepository
+          const participant = await this.guestMeetingParticipantRepository
             .createQueryBuilder('participant')
             .insert()
             .values({
@@ -98,9 +98,10 @@ export class MeetingService {
               meetingId: meetingId
             })
             .setQueryRunner(queryRunner)
-            .returning('id')
-            .execute()
-            .then(v => v.raw[0].id.toString());
+            .returning(['id', 'uuid'])
+            .execute();
+          const participantId = participant?.[0]?.id?.toString();
+          const participantUid = participant?.[0]?.uuid || '';
           const id =
             participantId.length == 1 ? `00${participantId}` : participantId == 2 ? `0${participantId}` : participantId;
           const invitationNo = `${await this.commonService.randString(4, 'QWERTYUIOPLKJHGFDSAZXCVBNM', '')}${id}`;
@@ -114,8 +115,7 @@ export class MeetingService {
             .setQueryRunner(queryRunner)
             .execute();
           //   send email after this
-          const encryptedInvitationId = await this.commonService.encrypt(invitationNo, 'invitationNo');
-          const urlCheckin = `${this.appConfigService.WEB_BASE_URL}/meeting/${encryptedInvitationId}`;
+          const urlCheckin = `${this.appConfigService.WEB_BASE_URL}/check-in/${participantUid}`;
           await this._sendMail(
             [meetingName, location, dayJs(startTime).locale('ID').format('DD MMMM YYYY, HH:mm'), urlCheckin],
             email,
@@ -150,8 +150,30 @@ export class MeetingService {
     });
   }
 
+  async participantDetail(id: string) {
+    const participant = await this.guestMeetingParticipantRepository
+      .createQueryBuilder('participant')
+      .innerJoinAndSelect('participant.meeting', 'meeting')
+      .leftJoinAndSelect('participant.checkin', 'checkin')
+      .where('participant.uuid = :id', { id })
+      .select('participant.uuid', 'id')
+      .addSelect('participant.invitation_no', 'invitationNo')
+      .addSelect('participant.guest_name', 'name')
+      .addSelect('participant.guest_email', 'email')
+      .addSelect('participant.instance_name', 'instanceName')
+      .addSelect('participant.instance_name', 'instanceName')
+      .addSelect('participant.depratement_name', 'depratementName')
+      .addSelect('participant.wa_no', 'waNo')
+      .addSelect('meeting.meeting_name', 'meetingName')
+      .addSelect('participant.status', 'status')
+      .addSelect("(CASE WHEN participant.status = 1 THEN 'Hadir' ELSE 'Belum Hadir' END)", 'statusText')
+      .addSelect("COALESCE(TO_CHAR(checkin.checkin_time,'YYYY-MM-DD HH24:MI:SS'),'')", 'checkinTime')
+      .getRawOne();
+    return participant;
+  }
+
   async checkin(param: CheckinDTO) {
-    const { invitationNo } = param;
+    const { meetingId, participantId } = param;
     const dataSource = await this.projectDbConfigService.dbConnection();
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -159,7 +181,11 @@ export class MeetingService {
     try {
       const participant = await this.guestMeetingParticipantRepository
         .createQueryBuilder('participant')
-        .where('invitation_no = :invitationNo', { invitationNo })
+        .innerJoinAndSelect('participant.meeting', 'meeting')
+        .where('uuid = :participantId AND meeting.uuid = :meetingId', {
+          participantId,
+          meetingId
+        })
         .select(['participant.id', 'participant.status'])
         .getOne();
       if (!participant) {
@@ -168,6 +194,15 @@ export class MeetingService {
       if (participant.status != 0) {
         throw new BadRequestException('Already checkin');
       }
+      await this.guestMeetingParticipantRepository
+        .createQueryBuilder('participant')
+        .where('id = :id AND status = 0', { id: participant.id })
+        .update()
+        .set({
+          status: 1
+        })
+        .setQueryRunner(queryRunner)
+        .execute();
       const currentDate = dayJs().format('YYYY-MM-DD HH:mm:ss');
       await this.guestCheckinRepository
         .createQueryBuilder('checkin')

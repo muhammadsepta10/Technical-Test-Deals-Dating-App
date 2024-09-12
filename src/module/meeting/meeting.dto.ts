@@ -39,7 +39,9 @@ export class SubmitMeetingDTO {
 
 export class CheckinDTO {
   @ApiProperty({ required: false })
-  invitationNo: string;
+  participantId: string;
+  @ApiProperty({ required: true })
+  meetingId: string;
 }
 
 export class ListMeetingDTO {
