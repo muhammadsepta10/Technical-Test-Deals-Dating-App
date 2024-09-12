@@ -9,6 +9,7 @@ import { CommonService } from '@common/service/common.service';
 import { MailerService } from '../mailer/mailer.service';
 import * as dayJs from 'dayjs';
 import { AppConfigService } from '@common/config/api/config.service';
+import { MasterService } from '../master/master.service';
 
 @Injectable()
 export class MeetingService {
@@ -16,7 +17,8 @@ export class MeetingService {
     private projectDbConfigService: ProjectDbConfigService,
     private commonService: CommonService,
     private mailService: MailerService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
+    private masterService: MasterService
   ) {}
   @InjectRepository(GuestMeetingRepository)
   private guestMeetingRepository: GuestMeetingRepository;
@@ -112,6 +114,14 @@ export class MeetingService {
             .setQueryRunner(queryRunner)
             .execute();
           //   send email after this
+          const encryptedInvitationId = await this.commonService.encrypt(invitationNo, 'invitationNo');
+          const urlCheckin = `${this.appConfigService.WEB_BASE_URL}/meeting/${encryptedInvitationId}`;
+          await this._sendMail(
+            [meetingName, location, dayJs(startTime).locale('ID').format('DD MMMM YYYY, HH:mm'), urlCheckin],
+            email,
+            'inviteParticipant',
+            0
+          );
         }
       }
       await queryRunner.commitTransaction();
@@ -124,6 +134,20 @@ export class MeetingService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private async _sendMail(params: string[], email: string, script: string, userId?: number) {
+    const scriptObj = await this.masterService.script().then(v => v[script]);
+    params.map((v, idx) => {
+      scriptObj.body = scriptObj.body.replace(`{{${idx + 1}}}`, v);
+      scriptObj.title = scriptObj.title.replace(`{{${idx + 1}}}`, v);
+    });
+    await this.mailService.sendMail({
+      email: email,
+      subject: scriptObj.title,
+      userId,
+      text: scriptObj.body
+    });
   }
 
   async checkin(param: CheckinDTO) {

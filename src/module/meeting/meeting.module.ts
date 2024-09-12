@@ -9,6 +9,7 @@ import { CommonModule } from '@common/service/common.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { LoginSessionDbModule } from 'src/db/project-db/entity/login-session/login-session.module';
 import { AppConfigModule } from '@common/config/api/config.module';
+import { MasterModule } from '../master/master.module';
 
 @Module({
   providers: [MeetingService],
@@ -21,7 +22,8 @@ import { AppConfigModule } from '@common/config/api/config.module';
     CommonModule,
     MailerModule,
     LoginSessionDbModule,
-    AppConfigModule
+    AppConfigModule,
+    MasterModule
   ]
 })
 export class MeetingModule {}
