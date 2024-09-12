@@ -1,4 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  Index,
+  OneToOne,
+  JoinColumn
+} from 'typeorm';
 import { User } from '../user/user.entity';
 import { GuestMeetingParticipant } from '../guest-meeting-participant/guest-meeting-participant.entity';
 
@@ -11,7 +21,8 @@ export class GuestCheckin {
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uuid: string;
 
-  @ManyToOne(() => GuestMeetingParticipant, guestMeetingParticipant => guestMeetingParticipant.id)
+  @OneToOne(() => GuestMeetingParticipant, guestMeetingParticipant => guestMeetingParticipant.id)
+  @JoinColumn()
   participant: GuestMeetingParticipant;
   @Column({ type: 'int', default: null, nullable: true })
   participantId: number;

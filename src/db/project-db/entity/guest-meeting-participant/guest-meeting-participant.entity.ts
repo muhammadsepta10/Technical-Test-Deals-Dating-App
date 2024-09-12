@@ -1,6 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  Index,
+  OneToOne
+} from 'typeorm';
 import { User } from '../user/user.entity';
 import { GuestMeeting } from '../guest-meeting/guest-meeting.entity';
+import { GuestCheckin } from '../guest-checkin/guest-checkin.entity';
 
 @Entity('guest_meeting_participant')
 export class GuestMeetingParticipant {
@@ -10,6 +20,9 @@ export class GuestMeetingParticipant {
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uuid: string;
+
+  @OneToOne(() => GuestCheckin, guestChecin => guestChecin.participant)
+  checkin: GuestCheckin;
 
   @Column({
     type: 'varchar',

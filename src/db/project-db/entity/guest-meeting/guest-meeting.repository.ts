@@ -23,7 +23,7 @@ export class GuestMeetingRepository extends Repository<GuestMeeting> {
 
   private _whereSearch(search: string) {
     const searchQuery = search
-      ? ` AND (meeting.meeting_name LIKE '%${search}%' OR meeting.pic_name LIKE '%${search}%')`
+      ? ` AND (meeting.meeting_name LIKE '%${search}%' OR meeting.pic_name LIKE '%${search}%' OR participant.guest_name LIKE '%${search}%')`
       : '';
     return searchQuery;
   }
