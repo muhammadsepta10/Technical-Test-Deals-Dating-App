@@ -99,7 +99,8 @@ export class MeetingService {
             })
             .setQueryRunner(queryRunner)
             .returning(['id', 'uuid'])
-            .execute();
+            .execute()
+            .then(v => v.raw?.[0]);
           const participantId = participant?.[0]?.id?.toString();
           const participantUid = participant?.[0]?.uuid || '';
           const id =
