@@ -6,8 +6,6 @@ import { RequestLogMiddleware } from '@common/middleware/log.middleware';
 import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
 import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
 import { DataSource } from 'typeorm';
-import { LogDBConfigModule } from '@common/config/db/log-db/config.module';
-import { LogDBConfigService } from '@common/config/db/log-db/config.service';
 import { resolve } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { path as appRoot } from 'app-root-path';
@@ -44,15 +42,6 @@ import { MasterModule } from './module/master/master.module';
       useFactory: (config: ProjectDbConfigService) => config.typeORMConfig(),
       // dataSource receives the configured DataSourceOptions
       // and returns a Promise<DataSource>.
-      dataSourceFactory: async options => {
-        const dataSource = await new DataSource(options).initialize();
-        return dataSource;
-      }
-    }),
-    TypeOrmModule.forRootAsync({
-      imports: [LogDBConfigModule],
-      inject: [LogDBConfigService],
-      useFactory: (config: LogDBConfigService) => config.typeORMConfig(),
       dataSourceFactory: async options => {
         const dataSource = await new DataSource(options).initialize();
         return dataSource;

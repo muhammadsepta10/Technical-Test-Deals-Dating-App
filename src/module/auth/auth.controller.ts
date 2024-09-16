@@ -1,14 +1,9 @@
-import { Body, Controller, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDTO, RegisterDTO } from './auth.dto';
+import { LoginDTO } from './auth.dto';
 import { TransformInterceptor } from '@common/interceptor/transform.interceptor';
-import { ApiBody, ApiConsumes, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { LoginPipe } from './auth.pipe';
-import { AppGuard } from '@common/guards/app.guard';
-import { AppId } from '@common/decorators/param.app.decorator';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from '@common/config/multer';
-import { User } from '@common/decorators/param.user.decorator';
 
 @Controller('/api/auth')
 @ApiTags('auth')
@@ -20,18 +15,6 @@ export class AuthController {
   @Post('/login')
   async login(@Body(LoginPipe) param: LoginDTO) {
     return this.authService.login(param);
-  }
-
-  @Post('/register')
-  @UseInterceptors(FilesInterceptor('files', 3, multerOptions('journalist_doc')))
-  @UseGuards(AppGuard)
-  @ApiBody({
-    type: RegisterDTO,
-    required: true
-  })
-  @ApiConsumes('multipart/form-data')
-  register(@User() user, @Body() param: RegisterDTO, @AppId() appId, @UploadedFiles() files: Express.Multer.File[]) {
-    return this.authService.register(user, param, appId, files);
   }
 
   // @Post("/forgot-pass")

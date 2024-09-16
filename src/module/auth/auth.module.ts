@@ -9,8 +9,6 @@ import { MasterAppDbModule } from 'src/db/project-db/entity/master-app/master-ap
 import { UserAccessDbModule } from 'src/db/project-db/entity/user-access/user-access.module';
 import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
 import { AppConfigModule } from '@common/config/api/config.module';
-import { UserJournalistModule } from 'src/db/project-db/entity/user-journalist/user-journalist.module';
-import { MasterBankModule } from 'src/db/project-db/entity/master-bank/master-bank.module';
 
 @Module({
   imports: [
@@ -21,9 +19,7 @@ import { MasterBankModule } from 'src/db/project-db/entity/master-bank/master-ba
     MasterAppDbModule,
     UserAccessDbModule,
     ProjectDbConfigModule,
-    AppConfigModule,
-    UserJournalistModule,
-    MasterBankModule
+    AppConfigModule
   ],
   controllers: [AuthController],
   providers: [AuthService],
