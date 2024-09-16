@@ -11,20 +11,16 @@ import { LogDBConfigService } from '@common/config/db/log-db/config.service';
 import { resolve } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { path as appRoot } from 'app-root-path';
-import { RequestDbModule } from './db/log-db/entity/request/request.module';
 import { LoggerModule } from '@common/logger/logger.module';
 import { AppConfigModule } from '@common/config/api/config.module';
 import { CommonModule } from '@common/service/common.module';
 import { CacheModule } from './module/cache/cache.module';
 import { AuthModule } from './module/auth/auth.module';
 import { UserModule } from './module/user/user.module';
-import { MediaModule } from './module/media/media.module';
-import { MasterModule } from './module/master/master.module';
 import { MailerModule } from './module/mailer/mailer.module';
 import { BullModule } from '@nestjs/bull';
 import { AppConfigService } from '@common/config/api/config.service';
-import { GuestBookModule } from './module/guest-book/guest-book.module';
-import { MeetingModule } from './module/meeting/meeting.module';
+import { MasterModule } from './module/master/master.module';
 
 @Module({
   imports: [
@@ -65,18 +61,14 @@ import { MeetingModule } from './module/meeting/meeting.module';
     ServeStaticModule.forRoot({
       rootPath: resolve(`${appRoot}/../public`)
     }),
-    RequestDbModule,
     LoggerModule,
     AppConfigModule,
     CommonModule,
     CacheModule,
     AuthModule,
     UserModule,
-    MediaModule,
-    MasterModule,
     MailerModule,
-    GuestBookModule,
-    MeetingModule
+    MasterModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -1,9 +1,7 @@
-import { Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MasterService } from './master.service';
 import { AuthGuard } from '@common/guards/auth.guard';
 import { Access } from '@common/decorators/param.access.decorator';
-import { ListReasonDTO } from './master.dto';
-import { ListReasonPipe } from './master.pipe';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { TransformInterceptor } from '@common/interceptor/transform.interceptor';
 
@@ -26,32 +24,5 @@ export class MasterController {
   // @Roles(['admin'])
   listAccess() {
     return this.masterService.listAccess();
-  }
-
-  @Get('/bank')
-  // @UseGuards(AuthGuard)
-  listBank() {
-    return this.masterService.listBank();
-  }
-
-  @Get('/news/category')
-  // @UseGuards(AuthGuard)
-  listNewsCategory() {
-    return this.masterService.newsCategory();
-  }
-
-  @Get('/reason')
-  lsitReason(@Query(ListReasonPipe) param: ListReasonDTO) {
-    return this.masterService.invalidReason(param);
-  }
-
-  @Get('/work-unit')
-  workUnit() {
-    return this.masterService.workUnit();
-  }
-
-  @Get('/instance-category')
-  instanceCategory() {
-    return this.masterService.instanceCategory();
   }
 }

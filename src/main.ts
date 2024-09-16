@@ -48,7 +48,7 @@ async function bootstrap() {
 
   // BULL MONITOR CONFIG
   const adapters: BullAdapter[] = [];
-  const queues = ['send-mail-simaspro', 'approved-simaspro'];
+  const queues = ['send-mail-simpeg'];
   for (let index = 0; index < queues.length; index++) {
     const queue = queues[index];
     const adapter = new BullAdapter(app.get<Queue>(`BullQueue_${queue}`));

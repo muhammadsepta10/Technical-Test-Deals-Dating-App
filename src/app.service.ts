@@ -4,7 +4,12 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   constructor(private commonService: CommonService) {}
-  getHello(): string {
-    return this.commonService.encrypt('I1:]_!1M_=bk&a9GJ671', 'appSecret');
+  async getHello() {
+    // return this.commonService.encrypt('I1:]_!1M_=bk&a9GJ671', 'appSecret');
+    const file = await this.commonService.generateQrCode({
+      content: 'https://google.com',
+      style: 'classic'
+    });
+    return file;
   }
 }

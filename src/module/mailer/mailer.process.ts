@@ -9,7 +9,7 @@ import { CommonService } from '@common/service/common.service';
 import { HttpException, InternalServerErrorException } from '@nestjs/common';
 import { Notification } from 'src/db/project-db/entity/notification/notification.entity';
 
-@Processor('send-mail-simaspro')
+@Processor('send-mail-simpeg')
 export class SendMailProcessor {
   private transport: Transporter<SMTPTransport.SentMessageInfo>;
   constructor(

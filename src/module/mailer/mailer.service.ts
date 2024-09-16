@@ -9,7 +9,7 @@ import { MasterService } from '../master/master.service';
 @Injectable()
 export class MailerService {
   constructor(
-    @InjectQueue('send-mail-simaspro')
+    @InjectQueue('send-mail-simpeg')
     private sendMailQueue: Queue<SendMailDTO>,
     private masterService: MasterService
   ) {}
