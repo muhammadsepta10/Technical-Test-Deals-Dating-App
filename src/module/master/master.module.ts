@@ -10,6 +10,9 @@ import { CommonModule } from '@common/service/common.module';
 import { UserDbModule } from '../../db/project-db/entity/user/user.module';
 import { LoginSessionDbModule } from 'src/db/project-db/entity/login-session/login-session.module';
 import { MasterScriptDbModule } from 'src/db/project-db/entity/master-script/master-script.module';
+import { MasterCabangDbModule } from 'src/db/project-db/entity/master-cabang/master-cabang.module';
+// import { ShiftDbModule } from "src/db/project-db/entity/shift/shift.module";
+import { AttendanceStatusDbModule } from 'src/db/project-db/entity/attendance-status/attendance-status.module';
 
 @Module({
   providers: [MasterService],
@@ -23,7 +26,9 @@ import { MasterScriptDbModule } from 'src/db/project-db/entity/master-script/mas
     CommonModule,
     UserDbModule,
     LoginSessionDbModule,
-    MasterScriptDbModule
+    MasterScriptDbModule,
+    MasterCabangDbModule,
+    AttendanceStatusDbModule
   ],
   exports: [MasterService]
 })

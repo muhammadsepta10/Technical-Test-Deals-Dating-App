@@ -6,10 +6,14 @@ import * as dayjs from 'dayjs';
 import { LoginSessionRepository } from 'src/db/project-db/entity/login-session/login-session.repository';
 import { UserRepository } from 'src/db/project-db/entity/user/user.repository';
 import { MasterAccessRepository } from 'src/db/project-db/entity/master-access/master-access.repository';
+import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private commonService: CommonService) {}
+  constructor(
+    private commonService: CommonService,
+    private projectDbConfigService: ProjectDbConfigService
+  ) {}
 
   @InjectRepository(UserRepository)
   private userRepository: UserRepository;

@@ -25,4 +25,10 @@ export class MasterController {
   listAccess() {
     return this.masterService.listAccess();
   }
+
+  @Get('/cabang')
+  @UseGuards(AuthGuard)
+  listCabang() {
+    return this.masterService.listCabang();
+  }
 }

@@ -1,22 +1,36 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  Index,
+  OneToOne,
+  JoinColumn
+} from 'typeorm';
 import { User } from '../user/user.entity';
-import { AttendanceStatusDet } from '../attendance-status-det/attendance-status-det.entity';
+import { UserEmployee } from '../user-employee/user-employee.entity';
+import { EmployeeShift } from '../employee-shift/employee-shift.entity';
 
 @Entity('attendance')
 export class Attendance {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => AttendanceStatusDet, attendanceStatusDet => attendanceStatusDet.id)
-  attendanceStatusDet: AttendanceStatusDet;
-  @Column({ default: null, nullable: true })
-  attendanceStatusDetId: number;
-
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uniqueId: string;
 
-  @Column({ type: 'int4', nullable: false })
+  @OneToOne(() => EmployeeShift, employeeShift => employeeShift.id)
+  @JoinColumn()
+  shift: EmployeeShift;
+  @Column({ default: null, nullable: true })
+  shiftId: number;
+
+  @ManyToOne(() => UserEmployee, userEmployee => userEmployee.id)
+  employee: UserEmployee;
+  @Column({ type: 'int4', nullable: true, default: null })
   employeeId: number;
 
   @CreateDateColumn({
@@ -33,22 +47,34 @@ export class Attendance {
   })
   check_out: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true, default: '' })
   latitude_in: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true, default: '' })
   longtitude_in: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true, default: '' })
   latitude_out: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true, default: '' })
   longtitude_out: string;
 
-  @Column({ type: 'smallint', width: 3, default: 0, comment: '0->inactive, 1->active', nullable: true })
+  @Column({
+    type: 'smallint',
+    width: 3,
+    default: 0,
+    comment: '1->clockin, 2->apel, 3->clockout',
+    nullable: true
+  })
   status: number;
 
-  @Column({ type: 'smallint', width: 2, default: 0, comment: '0->active, 1->inactive', nullable: true })
+  @Column({
+    type: 'smallint',
+    width: 2,
+    default: 0,
+    comment: '0->active, 1->inactive',
+    nullable: true
+  })
   is_deleted: number;
 
   @ManyToOne(() => User, user => user.id)
@@ -66,12 +92,23 @@ export class Attendance {
   @Column({ default: null, nullable: true })
   deletedById: number;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'NULL', nullable: true })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'NULL',
+    nullable: true
+  })
   deleted_at: string;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)'
+  })
   created_at: string;
 
-  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)'
+  })
   updated_at: string;
 }

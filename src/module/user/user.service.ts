@@ -7,16 +7,15 @@ import { MasterAppRepository } from 'src/db/project-db/entity/master-app/master-
 import { UserAccess } from 'src/db/project-db/entity/user-access/user-access.entity';
 import { UserAccessRepository } from 'src/db/project-db/entity/user-access/user-access.repository';
 import { UserRepository } from 'src/db/project-db/entity/user/user.repository';
-import { CreateUserDTO } from './user.dto';
-import { AppConfigService } from '@common/config/api/config.service';
+import { RegisterDTO } from './user.dto';
+import { UserEmployeeRepository } from 'src/db/project-db/entity/user-employee/user-employee.repository';
 // import {CreateUserDTO, UpdatePasswordDTO} from "src/dto/user.dto";
 
 @Injectable()
 export class UserService {
   constructor(
     private commonService: CommonService,
-    private projectDbConfigService: ProjectDbConfigService,
-    private appConfigService: AppConfigService
+    private projectDbConfigService: ProjectDbConfigService
   ) {}
   @InjectRepository(UserRepository)
   private userRepository: UserRepository;
@@ -30,41 +29,88 @@ export class UserService {
   @InjectRepository(MasterAppRepository)
   private masterAppRepository: MasterAppRepository;
 
-  async createUser(param: CreateUserDTO, userId, file: Express.Multer.File) {
+  @InjectRepository(UserEmployeeRepository)
+  private userEmployeeRepository: UserEmployeeRepository;
+
+  async createUser(param: RegisterDTO, userId) {
     const dataSource = await this.projectDbConfigService.dbConnection();
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const urlFile = file ? `'${this.appConfigService.BASE_URL + '/journalist_doc/' + file.filename}'` : '';
-      const { accessId, appId, name, password, username } = param;
-      const user = await this.userRepository.findUserLogin(username);
-      if (!user) {
+      const { accessId, appId, name, password, username, type, employe } = param;
+      let user = await this.userRepository.findUserLogin(username);
+      if (user) {
         throw new BadRequestException('User Alaready Exist');
       }
-      const masterAccess = await this.masterAccessRepository.findOne({ where: { id: accessId }, select: ['id'] });
+      const masterAccess = await this.masterAccessRepository.findOne({
+        where: { id: accessId },
+        select: ['id']
+      });
       if (!masterAccess) {
         throw new BadRequestException('Invalid Access');
       }
-      const masterApp = await this.masterAppRepository.findOne({ where: { id: appId }, select: ['id'] });
+      const masterApp = await this.masterAppRepository.findOne({
+        where: { id: appId },
+        select: ['id']
+      });
       if (!masterApp) {
         throw new BadRequestException('Invalid App');
       }
       const hashPassword = await this.commonService.bcrpytSign(password);
-      const createUser = await this.userRepository.insert({
-        name,
-        password: hashPassword,
-        username,
-        photo: urlFile,
-        status: 1
-      });
-      await this.userAccessRepository.insert({
-        userId: createUser.identifiers[0].id,
-        masterAppId: appId,
-        masterAccessId: accessId,
-        createdById: userId,
-        status: 1
-      });
+      user = await this.userRepository
+        .createQueryBuilder('user')
+        .insert()
+        .values({
+          name,
+          password: hashPassword,
+          username,
+          status: 1
+        })
+        .setQueryRunner(queryRunner)
+        .returning(['status', 'id'])
+        .execute()
+        .then(v => {
+          const raw = v.raw[0];
+          return {
+            id: raw.id,
+            hashPassword: '',
+            status: raw.status,
+            appId: appId,
+            accessId: accessId
+          };
+        });
+      await this.userAccessRepository
+        .createQueryBuilder('userAccess')
+        .insert()
+        .values({
+          userId: user.id,
+          masterAppId: appId,
+          masterAccessId: accessId,
+          createdById: userId,
+          status: 1
+        })
+        .setQueryRunner(queryRunner)
+        .execute();
+      if (type === 1) {
+        console.log('user', user);
+        const { departement, departementId, employeId, name, nip, position, section } = employe;
+        await this.userEmployeeRepository
+          .createQueryBuilder('userEmployee')
+          .insert()
+          .values({
+            userId: user.id,
+            departement,
+            departementId,
+            employee_name: name,
+            nip,
+            position,
+            section,
+            employeeId: `${employeId}`
+          })
+          .setQueryRunner(queryRunner)
+          .execute();
+      }
       await queryRunner.commitTransaction();
       return { message: 'create user success' };
     } catch (error) {
@@ -78,22 +124,23 @@ export class UserService {
     }
   }
 
-  async getMe(userId: number, appId: number) {
+  async getMe(userId: number) {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .innerJoin('user.userAccess', 'ua')
       .innerJoin('ua.masterAccess', 'access')
-      .leftJoin('user.UserJournalist', 'UserJournalist')
+      .leftJoin('user.userEmployee', 'userEmployee')
       .select('user.username', 'username')
       .addSelect('user.name', 'name')
       .addSelect('user.photo', 'photo')
       .addSelect('access.description', 'access')
+      .addSelect('userEmployee.uuid', 'employeeId')
       .addSelect('user.uuid', 'id')
-      .where(`user.id = :userId AND ua.masterAppId = :appId`, { userId, appId })
+      .where(`user.id = :userId`, { userId })
       .getRawOne();
     const userProps = Object.keys(user);
     const userValue = Object.values(user);
-    let userRfct = {};
+    let userRfct;
     for (let index = 0; index < userProps.length; index++) {
       const userProp = userProps[index];
       const userPropArr = userProp.split('_');
@@ -104,11 +151,14 @@ export class UserService {
           userRfct[objName] = {};
         }
         if (userValue[0]) {
-          userRfct[objName] = { ...userRfct[objName], [propName]: userValue[index] };
+          userRfct[objName] = {
+            ...userRfct[objName],
+            [propName]: userValue?.[index] || ''
+          };
         }
       }
       if (!objName) {
-        userRfct = { ...userRfct, [propName]: userValue[index] };
+        userRfct = { ...userRfct, [propName]: userValue?.[index] || '' };
       }
     }
     return userRfct;
@@ -130,9 +180,11 @@ export class UserService {
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndMapOne('user.userAccess', UserAccess, 'userAccess', '"userAccess"."userId" = user.id')
+      .leftJoin('user.userEmployee', 'userEmployee')
       .innerJoin('userAccess.masterAccess', 'masterAccess')
       .select('user.uuid', 'id')
       .addSelect('user.name', 'name')
+      .addSelect('userEmployee.uuid', 'employeeId')
       .addSelect('user.username', 'email')
       .addSelect('masterAccess.description', 'role')
       .addSelect("(CASE WHEN user.status = '1' THEN 'ACTIVE' ELSE 'INACTIVE' END)", 'status')

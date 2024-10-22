@@ -14,7 +14,7 @@ export class UserRepository extends Repository<User> {
       FROM "user" A
       JOIN user_access B ON A.id = B."userId"
       JOIN master_app C ON C.id = B."masterAppId"
-      WHERE A.username = $1`;
+      WHERE UPPER(A.username) = $1`;
 
     const result = await this.query(syntax, [username]);
     if (result.length > 0) return result[0];

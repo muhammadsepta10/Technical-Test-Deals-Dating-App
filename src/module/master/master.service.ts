@@ -6,6 +6,9 @@ import { MasterScriptRepository } from 'src/db/project-db/entity/master-script/m
 import { CacheService } from 'src/module/cache/cache.service';
 import { MasterMenuRepository } from 'src/db/project-db/entity/master-menu/master-menu.repository';
 import { MasterMediaRepository } from 'src/db/project-db/entity/master-media/master-media.repository';
+import { MasterCabangRepository } from 'src/db/project-db/entity/master-cabang/master-cabang.repository';
+// import { ShiftRepository } from "src/db/project-db/entity/shift/shift.repository";
+import { AttendanceStatusRepository } from 'src/db/project-db/entity/attendance-status/attendance-status.repository';
 
 @Injectable()
 export class MasterService {
@@ -19,6 +22,29 @@ export class MasterService {
   private masterMenuRepository: MasterMenuRepository;
   @InjectRepository(MasterMediaRepository)
   private masterMediaRepository: MasterMediaRepository;
+  @InjectRepository(MasterCabangRepository)
+  private masterCabangRepository: MasterCabangRepository;
+  @InjectRepository(AttendanceStatusRepository)
+  private attendanceStatusRepository: AttendanceStatusRepository;
+
+  async listCabang() {
+    const cabang = await this.masterCabangRepository.find({
+      where: { status: 1 },
+      select: ['name', 'id'],
+      order: { sort: 'ASC' }
+    });
+    return cabang;
+  }
+
+  async attendanceStatus() {
+    const attendanceStatus = await this.attendanceStatusRepository
+      .createQueryBuilder('attendanceStatus')
+      .select('attendanceStatus.uniqueId', 'id')
+      .addSelect('attendanceStatus.description', 'description')
+      .where('attendanceStatus.status = 1')
+      .getRawMany();
+    return attendanceStatus;
+  }
 
   async listMenu(accessId: number) {
     let menu = [];

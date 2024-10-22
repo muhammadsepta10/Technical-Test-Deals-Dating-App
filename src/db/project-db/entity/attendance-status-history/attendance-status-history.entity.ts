@@ -1,35 +1,26 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
 import { User } from '../user/user.entity';
+import { Attendance } from '../attendance/attendance.entity';
 import { AttendanceStatusDet } from '../attendance-status-det/attendance-status-det.entity';
-import { UserEmployee } from '../user-employee/user-employee.entity';
 
-@Entity('attendance_summary')
-export class AttendanceSummary {
+@Entity('attendance_status_history')
+export class AttendanceStatusHistory {
   @PrimaryGeneratedColumn('increment')
   id: number;
-
-  @ManyToOne(() => AttendanceStatusDet, attendanceStatusDet => attendanceStatusDet.id)
-  attendanceStatusDet: AttendanceStatusDet;
-  @Column({ default: null, nullable: true })
-  attendanceStatusDetId: number;
 
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uniqueId: string;
 
-  @ManyToOne(() => UserEmployee, userEmployee => userEmployee.id)
-  employee: UserEmployee;
-  @Column({ type: 'int4', nullable: true, default: null })
-  employeeId: number;
+  @ManyToOne(() => Attendance, attendance => attendance.id)
+  attendance: Attendance;
+  @Column({ default: null, nullable: true })
+  attendanceId: number;
 
-  @Column({ type: 'int4', nullable: false })
-  year: number;
-
-  @Column({ type: 'int4', nullable: false })
-  month: number;
-
-  @Column({ type: 'int4', default: 0 })
-  total_count: number;
+  @ManyToOne(() => AttendanceStatusDet, attendanceStatusDet => attendanceStatusDet.id)
+  attendanceStatusDet: AttendanceStatusDet;
+  @Column({ default: null, nullable: true })
+  attendanceStatusDetId: number;
 
   @Column({
     type: 'smallint',

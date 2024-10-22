@@ -1,11 +1,11 @@
 import { JoiValidationPipe } from '@common/pipes/joi-validation.pipe';
 import * as Joi from 'joi';
-import { DeviceDto, LoginDTO, RegisterDTO, ReqOtpDTO, ValidateOtpDTO } from './auth.dto';
+import { DeviceDto, LoginDTO, ReqOtpDTO, ValidateOtpDTO } from './auth.dto';
 
 export class LoginPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
     return Joi.object<LoginDTO>({
-      username: Joi.string().trim().lowercase().required(),
+      username: Joi.string().trim().uppercase().required(),
       media: Joi.string().optional().default('400'),
       password: Joi.string().trim().required(),
       version: Joi.number().optional().allow(''),
@@ -45,29 +45,6 @@ export class ValidateOtpPipe extends JoiValidationPipe {
     return Joi.object<ValidateOtpDTO>({
       email: Joi.string().email().lowercase().trim().required(),
       otp: Joi.number().required()
-    });
-  }
-}
-
-export class RegisterPipe extends JoiValidationPipe {
-  public buildSchema(): Joi.Schema {
-    return Joi.object<RegisterDTO>({
-      media_name: Joi.string().trim().required(),
-      whatsapp_no: Joi.string().trim().required(),
-      email: Joi.string().trim().required(),
-      address: Joi.string().trim().required(),
-      bankId: Joi.number().required(),
-      account_no: Joi.number().required(),
-      pers_card_no: Joi.string().trim().required(),
-      account_name: Joi.string().trim().uppercase().required(),
-      npwp: Joi.string().trim().required().min(15).max(17),
-      instagram_link: Joi.string().trim(),
-      facebook_link: Joi.string().trim(),
-      x_link: Joi.string().trim(),
-      tiktok_link: Joi.string().trim(),
-      youtube_link: Joi.string().trim(),
-      website_link: Joi.string().trim(),
-      podcast_link: Joi.string().trim()
     });
   }
 }

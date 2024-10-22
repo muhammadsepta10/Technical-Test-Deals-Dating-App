@@ -34,6 +34,7 @@ export class DeviceDto {
   @ApiProperty({ required: false })
   firebase_id: string;
 }
+
 export class LoginDTO {
   @ApiProperty()
   username: string;
@@ -54,46 +55,6 @@ export class DocumentDTO {
   file: string;
   @ApiProperty()
   name: string;
-}
-export class RegisterDTO {
-  @ApiProperty({ required: true })
-  media_name: string;
-  @ApiProperty({ required: true })
-  whatsapp_no: string;
-  @ApiProperty({ required: true })
-  email: string;
-  @ApiProperty({ required: true })
-  address: string;
-  @ApiProperty({ required: true })
-  bankId: number;
-  @ApiProperty({ required: true })
-  account_no: number;
-  @ApiProperty({ required: true })
-  account_name: string;
-  @ApiProperty({ required: true })
-  pers_card_no: string;
-  @ApiProperty()
-  npwp: string;
-  @ApiProperty()
-  instagram_link: string;
-  @ApiProperty()
-  facebook_link: string;
-  @ApiProperty()
-  x_link: string;
-  @ApiProperty()
-  tiktok_link: string;
-  @ApiProperty()
-  youtube_link: string;
-  @ApiProperty()
-  website_link: string;
-  @ApiProperty()
-  podcast_link: string;
-  @ApiProperty({
-    type: 'array',
-    items: { type: 'string', format: 'binary' },
-    description: 'Files'
-  })
-  files: Express.Multer.File[];
 }
 
 export class ReqOtpDTO {

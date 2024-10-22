@@ -19,11 +19,32 @@ export class AttendanceStatusDet {
   @Column({ type: 'varchar', unique: true, default: null, length: 150 })
   description: string;
 
-  @Column({ type: 'smallint', width: 3, default: 0, comment: '0->inactive, 1->active', nullable: true })
+  @Column({
+    type: 'smallint',
+    width: 3,
+    default: 0,
+    comment: '0->inactive, 1->active',
+    nullable: true
+  })
   status: number;
 
-  @Column({ type: 'smallint', width: 2, default: 0, comment: '0->active, 1->inactive', nullable: true })
+  @Column({
+    type: 'smallint',
+    width: 2,
+    default: 0,
+    comment: '0->active, 1->inactive',
+    nullable: true
+  })
   is_deleted: number;
+
+  @Column({
+    type: 'smallint',
+    width: 2,
+    default: 1,
+    comment: '0->hide, 1->show',
+    nullable: true
+  })
+  is_show: number;
 
   @ManyToOne(() => User, user => user.id)
   createdBy: User;
@@ -40,12 +61,23 @@ export class AttendanceStatusDet {
   @Column({ default: null, nullable: true })
   deletedById: number;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'NULL', nullable: true })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'NULL',
+    nullable: true
+  })
   deleted_at: string;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)'
+  })
   created_at: string;
 
-  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)'
+  })
   updated_at: string;
 }
