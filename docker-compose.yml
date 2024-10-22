@@ -3,26 +3,26 @@ version: '0.1'
 services:
     app:
         build: .
-        container_name: simaspro-api-container
+        container_name: simpeg-api-container
         ports:
-            - 9011:9011
+            - 9013:9013
         env_file: .env
         environment:
             TZ: Asia/Jakarta
         restart: always
         volumes:
-            - simaspro-api-volume:/vol/app
+            - simpeg-api-volume:/vol/app
             - /vol/harmonidigital/public:/vol/public
-            - /vol/harmonidigital/simaspro-api/assets:/vol/app/assets
+            - /vol/harmonidigital/simpeg-api/assets:/vol/app/assets
         networks:
-            - simaspro-api-networks
+            - simpeg-api-networks
 
 volumes:
-    simaspro-api-volume:
-        name: simaspro-api-volume
+    simpeg-api-volume:
+        name: simpeg-api-volume
 
 networks:
-    simaspro-api-networks:
-        name: simaspro-api-networks
+    simpeg-api-networks:
+        name: simpeg-api-networks
         driver: bridge
         external: true
