@@ -64,7 +64,7 @@ RUN apt-get update && apt-get install -y \
 RUN npm ci --omit=dev
 
 # Expose Port Service
-EXPOSE 9013
+EXPOSE 5017
 
 # Execute command
 CMD ["npm", "start"]

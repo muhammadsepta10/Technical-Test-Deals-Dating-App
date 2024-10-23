@@ -5,7 +5,7 @@ services:
         build: .
         container_name: simpeg-api-container
         ports:
-            - 9013:9013
+            - 5017:5017
         env_file: .env
         environment:
             TZ: Asia/Jakarta
