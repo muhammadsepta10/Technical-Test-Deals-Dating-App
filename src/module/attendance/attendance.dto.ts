@@ -18,6 +18,13 @@ export class AbsentHistoryDTO {
   limit: number;
 }
 
+export class ShiftPerUserDTO {
+  @ApiProperty({ required: false })
+  date: string;
+  @ApiProperty({ required: false, description: '0-> all shift,1->before date' })
+  type: number;
+}
+
 export interface ShiftCheckDTO {
   cabangId: number;
   shift: number;

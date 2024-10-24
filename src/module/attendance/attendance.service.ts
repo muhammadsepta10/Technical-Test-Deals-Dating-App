@@ -12,7 +12,8 @@ import {
   AddEmployeeShiftBulkDTO,
   AddEmployeeShiftDTO,
   ListShiftDTO,
-  ShiftCheckDTO
+  ShiftCheckDTO,
+  ShiftPerUserDTO
 } from './attendance.dto';
 import { ShiftRepository } from 'src/db/project-db/entity/shift/shift.repository';
 import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
@@ -137,6 +138,11 @@ export class AttendanceService {
       }
     });
     return data;
+  }
+
+  async shiftPerUser(param: ShiftPerUserDTO, userId: number) {
+    const userPerShift = await this.employeeShiftRepository.shiftPerUser(userId, param);
+    return userPerShift;
   }
 
   async absent(param: AbsentDTO, userId: number) {

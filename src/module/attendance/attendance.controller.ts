@@ -5,7 +5,8 @@ import {
   AbsentHistoryDTO,
   AddEmployeeShiftBulkDTO,
   AddEmployeeShiftDTO,
-  ListShiftDTO
+  ListShiftDTO,
+  ShiftPerUserDTO
 } from './attendance.dto';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { TransformInterceptor } from '@common/interceptor/transform.interceptor';
@@ -54,5 +55,11 @@ export class AttendanceController {
   @UseGuards(AuthGuard)
   async listShift(@Query() param: ListShiftDTO) {
     return this.attendanceService.listShift(param);
+  }
+
+  @Get('/shift/user')
+  @UseGuards(AuthGuard)
+  async shiftPerUser(@Query() param: ShiftPerUserDTO, @User() userId) {
+    return this.attendanceService.shiftPerUser(param, userId);
   }
 }
