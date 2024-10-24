@@ -80,7 +80,6 @@ export class MasterService {
         .addSelect('accessDet.m_nego', 'm_nego')
         .orderBy('menu.sort', 'ASC')
         .getRawMany();
-      console.log(menuDb);
       menu = this._buildMenuTree(menuDb);
       await this.cacheService.set(cacheKey, JSON.stringify(menu), menu?.length < 1 ? 1 : 3600);
     }
