@@ -52,7 +52,6 @@
     "mongodb": "^5.9.2",
     "nodemailer": "^6.9.14",
     "pg": "^8.11.5",
-    "puppeteer": "^23.2.0",
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.0",
     "rimraf": "^5.0.7",

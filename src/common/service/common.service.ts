@@ -8,8 +8,8 @@ import { AppConfigService } from '@common/config/api/config.service';
 import { Injectable } from '@nestjs/common';
 import { CacheService } from 'src/module/cache/cache.service';
 import { DocumentDTO } from '@common/dto';
-import { join, resolve } from 'path';
-import puppeteer from 'puppeteer';
+import { join } from 'path';
+// import puppeteer from 'puppeteer';
 import * as qrcode from 'qrcode';
 import { CanvasRenderingContext2D, createCanvas, loadImage } from 'canvas';
 
@@ -257,33 +257,33 @@ export class CommonService {
     }).format(number);
   }
 
-  async htmlToPdf(htmlContent: string, path: string): Promise<string> {
-    path = path.trim();
-    path = path[0] == '/' ? path : `/${path}`;
-    path = path[path.length - 1] == '/' ? path : `${path}/`;
-    const rootPath = resolve(`${appRoot}/../public/pdf`);
-    if (!existsSync(rootPath)) {
-      mkdirSync(rootPath, { recursive: true });
-    }
-    const pdfPath = `${rootPath}${path}`;
-    if (!existsSync(pdfPath)) {
-      mkdirSync(pdfPath, { recursive: true });
-    }
-    const filename = `${new Date().getTime()}${await this.randString(
-      10,
-      '1234567890QWERTYUIOPLKJHGFDSAZXCVBNM',
-      ''
-    )}.pdf`;
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    const page = await browser.newPage();
-    await page.setContent(htmlContent);
-    await page.pdf({ path: `${pdfPath}${filename}`, format: 'A4' });
-    await browser.close();
-    return `${this.appConfig.BASE_URL}/pdf${path}${filename}`;
-  }
+  // async htmlToPdf(htmlContent: string, path: string): Promise<string> {
+  //   path = path.trim();
+  //   path = path[0] == '/' ? path : `/${path}`;
+  //   path = path[path.length - 1] == '/' ? path : `${path}/`;
+  //   const rootPath = resolve(`${appRoot}/../public/pdf`);
+  //   if (!existsSync(rootPath)) {
+  //     mkdirSync(rootPath, { recursive: true });
+  //   }
+  //   const pdfPath = `${rootPath}${path}`;
+  //   if (!existsSync(pdfPath)) {
+  //     mkdirSync(pdfPath, { recursive: true });
+  //   }
+  //   const filename = `${new Date().getTime()}${await this.randString(
+  //     10,
+  //     '1234567890QWERTYUIOPLKJHGFDSAZXCVBNM',
+  //     ''
+  //   )}.pdf`;
+  //   const browser = await puppeteer.launch({
+  //     headless: true,
+  //     args: ['--no-sandbox', '--disable-setuid-sandbox']
+  //   });
+  //   const page = await browser.newPage();
+  //   await page.setContent(htmlContent);
+  //   await page.pdf({ path: `${pdfPath}${filename}`, format: 'A4' });
+  //   await browser.close();
+  //   return `${this.appConfig.BASE_URL}/pdf${path}${filename}`;
+  // }
 
   validUUID(uuid: string) {
     const matchUUid = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
