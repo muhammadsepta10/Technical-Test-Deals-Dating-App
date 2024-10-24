@@ -47,6 +47,20 @@ export class Attendance {
   })
   check_out: string;
 
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'NULL',
+    nullable: true
+  })
+  apel_in: string;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'NULL',
+    nullable: true
+  })
+  apel_out: string;
+
   @Column({ type: 'varchar', length: 50, nullable: true, default: '' })
   latitude_in: string;
 
@@ -63,7 +77,7 @@ export class Attendance {
     type: 'smallint',
     width: 3,
     default: 0,
-    comment: '1->clockin, 2->apel, 3->clockout',
+    comment: '1->clockin, 3->clock in apel, 4->clock out apel, 2->clockout',
     nullable: true
   })
   status: number;
