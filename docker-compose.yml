@@ -13,7 +13,7 @@ services:
         volumes:
             - simpeg-api-volume:/vol/app
             - /vol/harmonidigital/public:/vol/public
-            - /vol/harmonidigital/simpeg-api/assets:/vol/app/assets
+            - /vol/harmonidigital/simpeg-api-mobile/assets:/vol/app/assets
         networks:
             - simpeg-api-networks
 
