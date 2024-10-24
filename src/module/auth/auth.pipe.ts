@@ -6,9 +6,9 @@ export class LoginPipe extends JoiValidationPipe {
   public buildSchema(): Joi.Schema {
     return Joi.object<LoginDTO>({
       username: Joi.string().trim().uppercase().required(),
-      media: Joi.string().optional().default('400'),
+      media: Joi.string().optional().default('500'),
       password: Joi.string().trim().required(),
-      version: Joi.number().optional().allow(''),
+      version: Joi.string().optional().default('1.0').allow(''),
       device: Joi.object<DeviceDto>({
         imei: Joi.string().trim().optional().messages({
           'any.required': `imei is a required field`

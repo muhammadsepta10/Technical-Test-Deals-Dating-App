@@ -1,8 +1,8 @@
 import { BadRequestException, HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-// import { AttendanceStatusDetRepository } from "src/db/project-db/entity/attendance-status-det/attendance-status-det.repository";
-// import { AttendanceStatusPenaltyRepository } from "src/db/project-db/entity/attendance-status-penalty/attendance-status-penalty.repository";
-// import { AttendanceStatusRepository } from "src/db/project-db/entity/attendance-status/attendance-status.repository";
+import { AttendanceStatusDetRepository } from 'src/db/project-db/entity/attendance-status-det/attendance-status-det.repository';
+import { AttendanceStatusPenaltyRepository } from 'src/db/project-db/entity/attendance-status-penalty/attendance-status-penalty.repository';
+import { AttendanceStatusRepository } from 'src/db/project-db/entity/attendance-status/attendance-status.repository';
 import { AttendanceRepository } from 'src/db/project-db/entity/attendance/attendance.repository';
 import { EmployeeShiftRepository } from 'src/db/project-db/entity/employee-shift/employee-shift.repository';
 import { UserEmployeeRepository } from 'src/db/project-db/entity/user-employee/user-employee.repository';
@@ -18,23 +18,24 @@ import { ShiftRepository } from 'src/db/project-db/entity/shift/shift.repository
 import { ProjectDbConfigService } from '@common/config/db/project-db/config.service';
 import { QueryRunner } from 'typeorm';
 import { UserService } from '../user/user.service';
-// import { CommonService } from "@common/service/common.service";
+import { CommonService } from '@common/service/common.service';
 import * as dayJs from 'dayjs';
 
 @Injectable()
 export class AttendanceService {
   constructor(
     private projectDbConfigService: ProjectDbConfigService,
-    private userService: UserService // private commonService: CommonService,
+    private userService: UserService,
+    private commonService: CommonService
   ) {}
   @InjectRepository(AttendanceRepository)
   private attendanceRepository: AttendanceRepository;
-  // @InjectRepository(AttendanceStatusRepository)
-  // private attendanceStatusRepository: AttendanceStatusRepository;
-  // @InjectRepository(AttendanceStatusDetRepository)
-  // private attendanceStatusDetRepository: AttendanceStatusDetRepository;
-  // @InjectRepository(AttendanceStatusPenaltyRepository)
-  // private attendanceStatusPenaltyRepository: AttendanceStatusPenaltyRepository;
+  @InjectRepository(AttendanceStatusRepository)
+  private attendanceStatusRepository: AttendanceStatusRepository;
+  @InjectRepository(AttendanceStatusDetRepository)
+  private attendanceStatusDetRepository: AttendanceStatusDetRepository;
+  @InjectRepository(AttendanceStatusPenaltyRepository)
+  private attendanceStatusPenaltyRepository: AttendanceStatusPenaltyRepository;
   @InjectRepository(EmployeeShiftRepository)
   private employeeShiftRepository: EmployeeShiftRepository;
   @InjectRepository(UserEmployeeRepository)
@@ -44,7 +45,6 @@ export class AttendanceService {
 
   private async _shift(param: ShiftCheckDTO, queryRunner: QueryRunner) {
     const { cabangId, date, shift: shiftType, endTime, startTime, userId, endTimeApel, startTimeApel, isApel } = param;
-    // const shift = await this.shiftRepository.findOne({where:{date,cabangId,shift_type:shiftType}})
     let shift = await this.shiftRepository
       .createQueryBuilder('shift')
       .where('shift.date = :date AND shift.cabangId = :cabangId AND shift.shift_type = :shiftType', {
