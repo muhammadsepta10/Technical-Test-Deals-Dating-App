@@ -171,6 +171,9 @@ export class AttendanceService {
         'shift.end_time_apel'
       ])
       .getOne();
+    if (!shift) {
+      throw new BadRequestException('Shift anda untuk hari ini belum di input, Hubungi Hrd untuk mengatur shift anda');
+    }
     const attendance = await this.attendanceRepository
       .createQueryBuilder('attendance')
       .where('attendance.shiftId = :shiftId', { shiftId: shift.id })
