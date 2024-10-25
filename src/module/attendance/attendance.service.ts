@@ -186,7 +186,7 @@ export class AttendanceService {
           longtitude_out: longitude,
           latitude_out: latitude,
           check_out: dayJs().format('YYYY-MM-DD HH:mm:ss'),
-          status: 1
+          status: 2
         })
         .where('attendance.id = :id', { id: attendance.id })
         .execute();
@@ -201,7 +201,8 @@ export class AttendanceService {
           latitude_in: latitude,
           check_in: dayJs().format('YYYY-MM-DD HH:mm:ss'),
           shiftId: shift.id,
-          employeeId: shift.employee.id
+          employeeId: shift.employee.id,
+          status: 1
         })
         .execute();
     }
