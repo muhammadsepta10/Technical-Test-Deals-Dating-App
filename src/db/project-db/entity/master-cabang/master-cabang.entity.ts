@@ -13,6 +13,9 @@ export class MasterCabang {
   @Column({ type: 'varchar', default: '', nullable: true })
   name: string;
 
+  @Column({ type: 'varchar', default: '', nullable: true })
+  slug: string;
+
   @Column({ type: 'int', default: 1, nullable: true })
   status: number;
 
