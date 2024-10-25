@@ -41,7 +41,7 @@ export class EmployeeShiftRepository extends Repository<EmployeeShift> {
 			'Apel out'
 		ELSE
 			'' END) "statusText",
-		user_employee.status
+		COALESCE(attendance.status,0) status
 	FROM
 		employee_shift
 		JOIN user_employee ON employee_shift. "employeeId" = user_employee.id
