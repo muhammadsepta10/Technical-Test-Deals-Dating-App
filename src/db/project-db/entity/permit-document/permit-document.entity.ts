@@ -1,26 +1,20 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
 import { User } from '../user/user.entity';
-import { AttendanceStatus } from '../attendance-status/attendance-status.entity';
+import { Permit } from '../permit/permit.entity';
 
-@Entity('attendance_status_det')
-export class AttendanceStatusDet {
+@Entity('permit_document')
+export class PermitDocument {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => AttendanceStatus, attendanceStatus => attendanceStatus.id)
-  attendanceStatus: AttendanceStatus;
-  @Column({ default: null, nullable: true })
-  attendanceStatusId: number;
-
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
-  uniqueId: string;
+  uuid: string;
 
-  @Column({ type: 'varchar', unique: true, default: null, length: 150 })
-  description: string;
-
-  @Column({ type: 'varchar', unique: true, default: null, length: 150 })
-  code: string;
+  @ManyToOne(() => Permit, permit => permit.id)
+  permit: Permit;
+  @Column({ default: null, nullable: true })
+  permitId: number;
 
   @Column({
     type: 'smallint',
@@ -31,6 +25,12 @@ export class AttendanceStatusDet {
   })
   status: number;
 
+  @Column({ type: 'text', default: '', nullable: true })
+  description: string;
+
+  @Column({ type: 'text', default: '', nullable: true })
+  document: string;
+
   @Column({
     type: 'smallint',
     width: 2,
@@ -39,15 +39,6 @@ export class AttendanceStatusDet {
     nullable: true
   })
   is_deleted: number;
-
-  @Column({
-    type: 'smallint',
-    width: 2,
-    default: 1,
-    comment: '0->hide, 1->show',
-    nullable: true
-  })
-  is_show: number;
 
   @ManyToOne(() => User, user => user.id)
   createdBy: User;

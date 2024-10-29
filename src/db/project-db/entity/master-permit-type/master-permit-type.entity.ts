@@ -1,26 +1,17 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
 import { User } from '../user/user.entity';
-import { AttendanceStatus } from '../attendance-status/attendance-status.entity';
 
-@Entity('attendance_status_det')
-export class AttendanceStatusDet {
-  @PrimaryGeneratedColumn('increment')
+@Entity('master_permit_type')
+export class MasterPermitType {
+  @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => AttendanceStatus, attendanceStatus => attendanceStatus.id)
-  attendanceStatus: AttendanceStatus;
-  @Column({ default: null, nullable: true })
-  attendanceStatusId: number;
 
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
-  uniqueId: string;
+  uuid: string;
 
-  @Column({ type: 'varchar', unique: true, default: null, length: 150 })
-  description: string;
-
-  @Column({ type: 'varchar', unique: true, default: null, length: 150 })
-  code: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  name: string;
 
   @Column({
     type: 'smallint',
@@ -31,6 +22,17 @@ export class AttendanceStatusDet {
   })
   status: number;
 
+  @Column({ type: 'int', width: 3, default: 0, nullable: true })
+  sort: number;
+
+  @Column({
+    type: 'int',
+    default: 0,
+    nullable: true,
+    comment: '-1 = unlimited quota'
+  })
+  quota: number;
+
   @Column({
     type: 'smallint',
     width: 2,
@@ -39,15 +41,6 @@ export class AttendanceStatusDet {
     nullable: true
   })
   is_deleted: number;
-
-  @Column({
-    type: 'smallint',
-    width: 2,
-    default: 1,
-    comment: '0->hide, 1->show',
-    nullable: true
-  })
-  is_show: number;
 
   @ManyToOne(() => User, user => user.id)
   createdBy: User;
@@ -73,14 +66,16 @@ export class AttendanceStatusDet {
 
   @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP(6)'
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    nullable: true
   })
   created_at: string;
 
   @UpdateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
-    onUpdate: 'CURRENT_TIMESTAMP(6)'
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+    nullable: true
   })
   updated_at: string;
 }
