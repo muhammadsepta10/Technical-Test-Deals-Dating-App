@@ -12,6 +12,12 @@ import { LoginSessionDbModule } from 'src/db/project-db/entity/login-session/log
 import { ShiftDbModule } from 'src/db/project-db/entity/shift/shift.module';
 import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
 import { UserModule } from '../user/user.module';
+import { EmployeePermitQuotaModule } from 'src/db/project-db/entity/employee-permit-quota/employee-permit-quota.module';
+import { MasterPermitTypeDbModule } from 'src/db/project-db/entity/master-permit-type/master-permit-type.module';
+import { PermitDbModule } from 'src/db/project-db/entity/permit/permit.module';
+import { PermitDocumentDbModule } from 'src/db/project-db/entity/permit-document/permit-document.module';
+import { AppConfigModule } from '@common/config/api/config.module';
+import { MasterPermissionCategoryDbModule } from 'src/db/project-db/entity/master-permission-category/master-permission-category.module';
 
 @Module({
   providers: [AttendanceService],
@@ -27,7 +33,13 @@ import { UserModule } from '../user/user.module';
     LoginSessionDbModule,
     ShiftDbModule,
     ProjectDbConfigModule,
-    UserModule
+    UserModule,
+    EmployeePermitQuotaModule,
+    MasterPermitTypeDbModule,
+    PermitDbModule,
+    PermitDocumentDbModule,
+    AppConfigModule,
+    MasterPermissionCategoryDbModule
   ]
 })
 export class AttendanceModule {}

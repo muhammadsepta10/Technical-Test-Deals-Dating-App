@@ -12,6 +12,8 @@ import {
   AddEmployeeShiftBulkDTO,
   AddEmployeeShiftDTO,
   ListShiftDTO,
+  PermitDTO,
+  PermitListDTO,
   ShiftCheckDTO,
   ShiftPerUserDTO
 } from './attendance.dto';
@@ -21,13 +23,19 @@ import { QueryRunner } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { CommonService } from '@common/service/common.service';
 import * as dayJs from 'dayjs';
+import { PermitRepository } from 'src/db/project-db/entity/permit/permit.repository';
+import { PermitDocumentRepository } from 'src/db/project-db/entity/permit-document/permit-document.repository';
+import { EmployeePermitQuotaRepository } from 'src/db/project-db/entity/employee-permit-quota/employee-permit-quota.repository';
+import { MasterPermissionCategoryRepository } from 'src/db/project-db/entity/master-permission-category/master-permission-category.repository';
+import { AppConfigService } from '@common/config/api/config.service';
 
 @Injectable()
 export class AttendanceService {
   constructor(
     private projectDbConfigService: ProjectDbConfigService,
     private userService: UserService,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private appConfigService: AppConfigService
   ) {}
   @InjectRepository(AttendanceRepository)
   private attendanceRepository: AttendanceRepository;
@@ -43,6 +51,14 @@ export class AttendanceService {
   private userEmployeeRepository: UserEmployeeRepository;
   @InjectRepository(ShiftRepository)
   private shiftRepository: ShiftRepository;
+  @InjectRepository(PermitRepository)
+  private permitRepository: PermitRepository;
+  @InjectRepository(PermitDocumentRepository)
+  private permitDocumentRepository: PermitDocumentRepository;
+  @InjectRepository(EmployeePermitQuotaRepository)
+  private employeePermitQuotaRepository: EmployeePermitQuotaRepository;
+  @InjectRepository(MasterPermissionCategoryRepository)
+  private masterPermissionCategoryRepository: MasterPermissionCategoryRepository;
 
   private async _shift(param: ShiftCheckDTO, queryRunner: QueryRunner) {
     const { cabangId, date, shift: shiftType, endTime, startTime, userId, endTimeApel, startTimeApel, isApel } = param;
@@ -146,70 +162,91 @@ export class AttendanceService {
   }
 
   async absent(param: AbsentDTO, userId: number) {
-    // const { LATE_HOUR } = await this.commonService.generalParameter();
-    const { latitude, longitude } = param;
-    const user = await this.userService.getMe(userId);
-    if (!user?.employeeId) {
-      throw new BadRequestException('User is Not Employee');
-    }
-    const shift = await this.employeeShiftRepository
-      .createQueryBuilder('employeeShift')
-      .innerJoinAndSelect('employeeShift.employee', 'employee')
-      .innerJoinAndSelect('employeeShift.shift', 'shift')
-      .where('employee.uuid = :employeeId AND shift.date = :currenDate', {
-        employeeId: user.employeeId,
-        currenDate: dayJs().format('YYYY-MM-DD')
-      })
-      .select([
-        'employeeShift.id',
-        'shift.id',
-        'employee.id',
-        'shift.date',
-        'shift.start_time',
-        'shift.end_time',
-        'shift.start_time_apel',
-        'shift.end_time_apel'
-      ])
-      .getOne();
-    if (!shift) {
-      throw new BadRequestException('Shift anda untuk hari ini belum di input, Hubungi Hrd untuk mengatur shift anda');
-    }
-    const attendance = await this.attendanceRepository
-      .createQueryBuilder('attendance')
-      .where('attendance.shiftId = :shiftId', { shiftId: shift.id })
-      .select(['attendance.id'])
-      .getOne();
-    const inOut = !attendance ? 1 : 0;
-    if (attendance) {
-      // clock out
-      await this.attendanceRepository
-        .createQueryBuilder('attendance')
-        .update()
-        .set({
-          longtitude_out: longitude,
-          latitude_out: latitude,
-          check_out: dayJs().format('YYYY-MM-DD HH:mm:ss'),
-          status: 2
+    const dataSource = await this.projectDbConfigService.dbConnection();
+    const queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // const { LATE_HOUR } = await this.commonService.generalParameter();
+      const { latitude, longitude } = param;
+      const user = await this.userService.getMe(userId);
+      if (!user?.employeeId) {
+        throw new BadRequestException('User is Not Employee');
+      }
+      const shift = await this.employeeShiftRepository
+        .createQueryBuilder('employeeShift')
+        .innerJoinAndSelect('employeeShift.employee', 'employee')
+        .innerJoinAndSelect('employeeShift.shift', 'shift')
+        .where('employee.uuid = :employeeId AND shift.date = :currenDate', {
+          employeeId: user.employeeId,
+          currenDate: dayJs().format('YYYY-MM-DD')
         })
-        .where('attendance.id = :id', { id: attendance.id })
-        .execute();
-    }
-    if (!attendance) {
-      // clockIn
-      await this.attendanceRepository
+        .setQueryRunner(queryRunner)
+        .select([
+          'employeeShift.id',
+          'shift.id',
+          'employee.id',
+          'shift.date',
+          'shift.start_time',
+          'shift.end_time',
+          'shift.start_time_apel',
+          'shift.end_time_apel'
+        ])
+        .getOne();
+      if (!shift) {
+        throw new BadRequestException(
+          'Shift anda untuk hari ini belum di input, Hubungi Hrd untuk mengatur shift anda'
+        );
+      }
+      const attendance = await this.attendanceRepository
         .createQueryBuilder('attendance')
-        .insert()
-        .values({
-          longtitude_in: longitude,
-          latitude_in: latitude,
-          check_in: dayJs().format('YYYY-MM-DD HH:mm:ss'),
-          shiftId: shift.id,
-          employeeId: shift.employee.id,
-          status: 1
-        })
-        .execute();
+        .where('attendance.shiftId = :shiftId', { shiftId: shift.id })
+        .select(['attendance.id'])
+        .setQueryRunner(queryRunner)
+        .getOne();
+      const inOut = !attendance ? 1 : 0;
+      if (attendance) {
+        // clock out
+        await this.attendanceRepository
+          .createQueryBuilder('attendance')
+          .update()
+          .setQueryRunner(queryRunner)
+          .set({
+            longtitude_out: longitude,
+            latitude_out: latitude,
+            check_out: dayJs().format('YYYY-MM-DD HH:mm:ss'),
+            status: 2
+          })
+          .where('attendance.id = :id', { id: attendance.id })
+          .execute();
+      }
+      if (!attendance) {
+        // clockIn
+        await this.attendanceRepository
+          .createQueryBuilder('attendance')
+          .insert()
+          .setQueryRunner(queryRunner)
+          .values({
+            longtitude_in: longitude,
+            latitude_in: latitude,
+            check_in: dayJs().format('YYYY-MM-DD HH:mm:ss'),
+            shiftId: shift.id,
+            employeeId: shift.employee.id,
+            status: 1
+          })
+          .execute();
+      }
+      await queryRunner.commitTransaction();
+      return { message: inOut ? 'Success Clockin' : 'Success Clockout' };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (!error?.response || !error?.status) {
+        throw new InternalServerErrorException(error);
+      }
+      throw new HttpException(error?.response, error?.status);
+    } finally {
+      await queryRunner.release();
     }
-    return { message: inOut ? 'Success Clockin' : 'Success Clockout' };
   }
 
   async addEmployeeShift(param: AddEmployeeShiftDTO, userId: number, queryRunner?: QueryRunner) {
@@ -333,6 +370,170 @@ export class AttendanceService {
   async listShift(param: ListShiftDTO) {
     const list = await this.shiftRepository.list(param);
     const cnt = await this.shiftRepository.cnt(param);
+    return {
+      raw: list,
+      totalData: cnt,
+      totalPage: Math.ceil(cnt / param.limit)
+    };
+  }
+
+  private async _checkQuota({
+    countDays,
+    permitTypeId,
+    queryRunner,
+    employeeId,
+    updated
+  }: {
+    countDays: number;
+    permitTypeId: number;
+    queryRunner: QueryRunner;
+    employeeId: number;
+    updated: boolean;
+  }) {
+    const currentYear = dayJs().year().toString();
+    const permitTypeQuota = await this.employeePermitQuotaRepository
+      .createQueryBuilder('employeePermitQuota')
+      .where(
+        'employeePermitQuota.masterPermitTypeId = :permitId AND employeePermitQuota.employeeId = :employeeId AND employeePermitQuota.year = :currentYear',
+        { permitId: permitTypeId, currentYear, employeeId }
+      )
+      .select(['employeePermitQuota.quota', 'employeePermitQuota.id'])
+      .setQueryRunner(queryRunner)
+      .getOne()
+      .then(v => {
+        return { quota: v?.quota || 0, id: v.id };
+      });
+    if (countDays > permitTypeQuota.quota) {
+      throw new BadRequestException('Kuota cuti anda tidak mencukupi');
+    }
+    if (updated) {
+      const update = await this.employeePermitQuotaRepository
+        .createQueryBuilder('employeePermitQuota')
+        .update()
+        .set({ quota: () => `quota-${countDays}` })
+        .where('id = :id AND quota >= :quota', {
+          id: permitTypeQuota.id,
+          quota: countDays
+        })
+        .setQueryRunner(queryRunner)
+        .execute();
+      if (update.affected < 1) {
+        throw new BadRequestException('Kuota cuti anda tidak mencukupi');
+      }
+    }
+  }
+
+  async permit(param: PermitDTO, files: Express.Multer.File[], userId: number) {
+    const dataSource = await this.projectDbConfigService.dbConnection();
+    const queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const { startDate, endDate, description, type, permissionCategoryId } = param;
+      const employee = await this.userEmployeeRepository
+        .createQueryBuilder('userEmployee')
+        .where('userEmployee.userId = :userId', { userId })
+        .select(['userEmployee.id'])
+        .getOne();
+      const permissionCategory = await this.masterPermissionCategoryRepository
+        .createQueryBuilder('masterPermissionCategory')
+        .where('masterPermissionCategory.id = :permissionCategoryId', {
+          permissionCategoryId
+        })
+        .select(['masterPermissionCategory.id', 'masterPermissionCategory.code'])
+        .getOne();
+      if (!permissionCategory) {
+        throw new BadRequestException('Invalid Permission category');
+      }
+      let permitTypeId = null;
+      if (!employee) {
+        throw new BadRequestException('Invalid Employee');
+      }
+      const countDays = dayJs(endDate).diff(dayJs(startDate), 'day');
+      let attendanceStatusDetCode = type == 1 ? 'i' : 'c';
+      if (type == 1) {
+        if (permissionCategory.code == 's') {
+          if (files.length < 1) {
+            attendanceStatusDetCode = 'sts';
+          }
+          if (files.length > 0) {
+            attendanceStatusDetCode = 'sds';
+          }
+        }
+      }
+      if (type == 2) {
+        // cuti
+        permitTypeId = param.permitTypeId;
+
+        // check and update quota cuti
+        await this._checkQuota({
+          countDays,
+          permitTypeId,
+          queryRunner,
+          employeeId: employee.id,
+          updated: false
+        });
+      }
+      const attendanceStatusDet = await this.attendanceStatusDetRepository
+        .createQueryBuilder('attendanceStatusDet')
+        .where('code = :code ', { code: attendanceStatusDetCode })
+        .select(['attendanceStatusDet.id'])
+        .getOne();
+      const permit = await this.permitRepository
+        .createQueryBuilder('permit')
+        .insert()
+        .values({
+          description,
+          days: countDays,
+          start_date: startDate,
+          end_date: endDate,
+          masterPermitTypeId: permitTypeId,
+          userEmployeeId: employee.id,
+          status: 0,
+          masterPermissionCategoryId: permissionCategoryId,
+          attendanceStatusDetId: attendanceStatusDet.id,
+          type,
+          createdById: userId
+        })
+        .setQueryRunner(queryRunner)
+        .returning(['id'])
+        .execute();
+      for (let index = 0; index < files.length; index++) {
+        const file = files[index];
+        const urlFile = `${this.appConfigService.BASE_URL + '/permit_doc/' + file.filename}`;
+        await this.permitDocumentRepository
+          .createQueryBuilder('permitDocument')
+          .insert()
+          .values({
+            permitId: permit.raw[0].id,
+            document: urlFile,
+            description: '',
+            createdById: userId
+          })
+          .setQueryRunner(queryRunner)
+          .execute();
+      }
+      await queryRunner.commitTransaction();
+      return { message: 'success' };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (!error?.response || !error?.status) {
+        throw new InternalServerErrorException(error);
+      }
+      throw new HttpException(error?.response, error?.status);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async permitList(param: PermitListDTO, userId: number) {
+    const employee = await this.userEmployeeRepository
+      .createQueryBuilder('userEmployee')
+      .where('userEmployee.userId = :userId', { userId })
+      .select(['userEmployee.id'])
+      .getOne();
+    const list = await this.permitRepository.list(param, employee.id);
+    const cnt = await this.permitRepository.cnt(param, employee.id);
     return {
       raw: list,
       totalData: cnt,

@@ -18,6 +18,39 @@ export class AbsentHistoryDTO {
   limit: number;
 }
 
+export class PermitListDTO {
+  @ApiProperty({ required: false, default: -1 })
+  status: number;
+  @ApiProperty({ required: false, default: 1 })
+  page: number;
+  @ApiProperty({ required: false, default: 10 })
+  limit: number;
+  @ApiProperty({ required: false, default: 0 })
+  type: number;
+}
+
+export class PermitDTO {
+  @ApiProperty({ required: true, default: '2024-10-10' })
+  startDate: string;
+  @ApiProperty({ required: true, default: '2024-10-10' })
+  endDate: string;
+  @ApiProperty({ required: false, description: '-' })
+  description: string;
+  @ApiProperty({
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    description: 'Files',
+    required: false
+  })
+  files: Express.Multer.File[];
+  @ApiProperty({ required: false })
+  permitTypeId: number;
+  @ApiProperty({ required: true })
+  permissionCategoryId: number;
+  @ApiProperty({ required: false, description: '1-> izin, 2->cuti' })
+  type: number;
+}
+
 export class ShiftPerUserDTO {
   @ApiProperty({ required: false })
   date: string;
