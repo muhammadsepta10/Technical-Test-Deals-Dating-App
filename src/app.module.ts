@@ -19,7 +19,6 @@ import { MailerModule } from './module/mailer/mailer.module';
 import { BullModule } from '@nestjs/bull';
 import { AppConfigService } from '@common/config/api/config.service';
 import { MasterModule } from './module/master/master.module';
-import { AttendanceModule } from './module/attendance/attendance.module';
 
 @Module({
   imports: [
@@ -58,8 +57,7 @@ import { AttendanceModule } from './module/attendance/attendance.module';
     AuthModule,
     UserModule,
     MailerModule,
-    MasterModule,
-    AttendanceModule
+    MasterModule
   ],
   controllers: [AppController],
   providers: [AppService]
