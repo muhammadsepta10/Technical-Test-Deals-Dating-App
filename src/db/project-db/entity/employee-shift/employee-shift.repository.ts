@@ -47,6 +47,7 @@ export class EmployeeShiftRepository extends Repository<EmployeeShift> {
 		employee_shift
 		JOIN user_employee ON employee_shift. "employeeId" = user_employee.id
 		JOIN shift ON employee_shift. "shiftId" = shift.id
+		JOIN master_cabang ON master_cabang.id = shift."cabangId"
 		LEFT JOIN attendance ON employee_shift.id = attendance. "shiftId"
   	WHERE user_employee."userId" = $1${this._whereDate(para.date)}${this._listShiftType(para.type)}
     `;
