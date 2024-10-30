@@ -12,27 +12,9 @@ export class CreateUserDTO {
   @ApiProperty()
   password: string;
 }
-export class EmployeeDTO {
-  @ApiProperty()
-  employeId: string;
-  @ApiProperty()
-  nip: string;
-  @ApiProperty()
-  departementId: string;
-  @ApiProperty()
-  departement: string;
-  @ApiProperty()
-  section: string;
-  @ApiProperty()
-  position: string;
-  @ApiProperty()
-  name: string;
-}
 
 export class RegisterDTO {
   createdById?: number;
-  @ApiProperty()
-  employe?: EmployeeDTO;
   @ApiProperty()
   name: string;
   @ApiProperty()

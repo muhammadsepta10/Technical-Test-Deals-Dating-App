@@ -8,7 +8,6 @@ import { UserAccess } from 'src/db/project-db/entity/user-access/user-access.ent
 import { UserAccessRepository } from 'src/db/project-db/entity/user-access/user-access.repository';
 import { UserRepository } from 'src/db/project-db/entity/user/user.repository';
 import { RegisterDTO } from './user.dto';
-import { UserEmployeeRepository } from 'src/db/project-db/entity/user-employee/user-employee.repository';
 // import {CreateUserDTO, UpdatePasswordDTO} from "src/dto/user.dto";
 
 @Injectable()
@@ -29,16 +28,13 @@ export class UserService {
   @InjectRepository(MasterAppRepository)
   private masterAppRepository: MasterAppRepository;
 
-  @InjectRepository(UserEmployeeRepository)
-  private userEmployeeRepository: UserEmployeeRepository;
-
   async createUser(param: RegisterDTO, userId) {
     const dataSource = await this.projectDbConfigService.dbConnection();
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const { accessId, appId, name, password, username, type, employe } = param;
+      const { accessId, appId, name, password, username, type } = param;
       let user = await this.userRepository.findUserLogin(username);
       if (user) {
         throw new BadRequestException('User Alaready Exist');
@@ -93,23 +89,6 @@ export class UserService {
         .setQueryRunner(queryRunner)
         .execute();
       if (type === 1) {
-        console.log('user', user);
-        const { departement, departementId, employeId, name, nip, position, section } = employe;
-        await this.userEmployeeRepository
-          .createQueryBuilder('userEmployee')
-          .insert()
-          .values({
-            userId: user.id,
-            departement,
-            departementId,
-            employee_name: name,
-            nip,
-            position,
-            section,
-            employeeId: `${employeId}`
-          })
-          .setQueryRunner(queryRunner)
-          .execute();
       }
       await queryRunner.commitTransaction();
       return { message: 'create user success' };

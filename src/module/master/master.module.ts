@@ -12,12 +12,6 @@ import { LoginSessionDbModule } from 'src/db/project-db/entity/login-session/log
 import { MasterScriptDbModule } from 'src/db/project-db/entity/master-script/master-script.module';
 import { MasterCabangDbModule } from 'src/db/project-db/entity/master-cabang/master-cabang.module';
 // import { ShiftDbModule } from "src/db/project-db/entity/shift/shift.module";
-import { AttendanceStatusDbModule } from 'src/db/project-db/entity/attendance-status/attendance-status.module';
-import { MasterPermitTypeDbModule } from 'src/db/project-db/entity/master-permit-type/master-permit-type.module';
-import { EmployeePermitQuotaModule } from 'src/db/project-db/entity/employee-permit-quota/employee-permit-quota.module';
-import { UserEmployeeModule } from 'src/db/project-db/entity/user-employee/user-employee.module';
-import { AppConfigModule } from '@common/config/api/config.module';
-import { MasterPermissionCategoryDbModule } from 'src/db/project-db/entity/master-permission-category/master-permission-category.module';
 
 @Module({
   providers: [MasterService],
@@ -32,13 +26,7 @@ import { MasterPermissionCategoryDbModule } from 'src/db/project-db/entity/maste
     UserDbModule,
     LoginSessionDbModule,
     MasterScriptDbModule,
-    MasterCabangDbModule,
-    AttendanceStatusDbModule,
-    MasterPermitTypeDbModule,
-    EmployeePermitQuotaModule,
-    UserEmployeeModule,
-    AppConfigModule,
-    MasterPermissionCategoryDbModule
+    MasterCabangDbModule
   ],
   exports: [MasterService]
 })

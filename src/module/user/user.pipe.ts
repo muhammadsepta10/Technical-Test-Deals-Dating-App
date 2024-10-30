@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 import { JoiValidationPipe } from '@common/pipes/joi-validation.pipe';
-import { CreateUserDTO, EmployeeDTO, RegisterDTO } from './user.dto';
+import { CreateUserDTO, RegisterDTO } from './user.dto';
 
 // export class UpdatePassPipe extends JoiValidationPipe {
 // public buildSchema(): Joi.Schema {
@@ -22,22 +22,6 @@ export class CreateUserPipe extends JoiValidationPipe {
   }
 }
 
-export class EmployeePipe extends JoiValidationPipe {
-  public buildSchema(): Joi.Schema {
-    return employeeSchema;
-  }
-}
-
-export const employeeSchema = Joi.object<EmployeeDTO>({
-  departement: Joi.string().uppercase().trim().required(),
-  departementId: Joi.number().greater(0).required(),
-  employeId: Joi.number().greater(0).required(),
-  name: Joi.string().trim().uppercase().required(),
-  nip: Joi.string().trim().required(),
-  position: Joi.string().trim().uppercase().required(),
-  section: Joi.string().trim().uppercase().required()
-});
-
 export const registerSchema = Joi.object<RegisterDTO>({
   accessId: Joi.number().required(),
   appId: Joi.number().required(),
@@ -45,12 +29,7 @@ export const registerSchema = Joi.object<RegisterDTO>({
   name: Joi.string().trim().required(),
   password: Joi.string().required(),
   type: Joi.number().valid(1, 2).required(),
-  username: Joi.string().trim().pattern(/^\S+$/).uppercase().required(),
-  employe: Joi.when('type', {
-    is: 1,
-    then: employeeSchema,
-    otherwise: Joi.forbidden()
-  })
+  username: Joi.string().trim().pattern(/^\S+$/).uppercase().required()
 });
 
 export class RegisterPipe extends JoiValidationPipe {

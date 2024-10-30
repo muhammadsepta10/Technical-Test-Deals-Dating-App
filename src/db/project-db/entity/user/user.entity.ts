@@ -1,16 +1,6 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserDevice } from '../user_device/user_device.entity';
 import { UserAccess } from '../user-access/user-access.entity';
-import { UserEmployee } from '../user-employee/user-employee.entity';
 
 @Entity('user')
 export class User {
@@ -20,9 +10,6 @@ export class User {
   @Index()
   @Column({ type: 'uuid', default: () => 'uuid_generate_v4()', unique: true })
   uuid: string;
-
-  @OneToOne(() => UserEmployee, userEmployee => userEmployee.user)
-  userEmployee: UserEmployee;
 
   @Column({
     default: '',
