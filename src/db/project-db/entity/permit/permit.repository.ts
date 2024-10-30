@@ -28,7 +28,7 @@ export class PermitRepository extends Repository<Permit> {
     const skip = (param.page <= 1 ? 0 : param.page - 1) * param.limit;
     const syntax = `SELECT
   permit.uuid id,
-	to_char(created_at, 'YYYY-MM-DD HH24:mi:ss') "createdAt",
+	to_char(permit.created_at, 'YYYY-MM-DD HH24:mi:ss') "createdAt",
 	permit.days,
 	to_char(permit.start_date, 'YYYY-MM-DD') "startDate",
 	to_char(permit.end_date, 'YYYY-MM-DD') "endDate",
@@ -42,9 +42,12 @@ export class PermitRepository extends Repository<Permit> {
 			'Ditolak'
 		ELSE
 			''
-		END) "statusText"
+		END) "statusText",
+	master_permission_category. "name" "categoryName",
+	permit.description
 FROM
 	permit
+JOIN master_permission_category ON permit. "masterPermissionCategoryId" = master_permission_category.id
 WHERE
   permit."userEmployeeId" = $1${this._whereStatus(
     param.status
