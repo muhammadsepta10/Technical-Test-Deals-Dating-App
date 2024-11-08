@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MasterAccessRepository } from 'src/db/project-db/entity/master-access/master-access.repository';
 import { MasterScriptDTO } from './master.dto';
@@ -6,12 +6,6 @@ import { MasterScriptRepository } from 'src/db/project-db/entity/master-script/m
 import { CacheService } from 'src/module/cache/cache.service';
 import { MasterMenuRepository } from 'src/db/project-db/entity/master-menu/master-menu.repository';
 import { MasterMediaRepository } from 'src/db/project-db/entity/master-media/master-media.repository';
-import { MasterCabangRepository } from 'src/db/project-db/entity/master-cabang/master-cabang.repository';
-// import { ShiftRepository } from "src/db/project-db/entity/shift/shift.repository";
-import { AttendanceStatusRepository } from 'src/db/project-db/entity/attendance-status/attendance-status.repository';
-import { EmployeePermitQuotaRepository } from 'src/db/project-db/entity/employee-permit-quota/employee-permit-quota.repository';
-import { UserEmployeeRepository } from 'src/db/project-db/entity/user-employee/user-employee.repository';
-import { MasterPermissionCategoryRepository } from 'src/db/project-db/entity/master-permission-category/master-permission-category.repository';
 
 @Injectable()
 export class MasterService {
@@ -25,59 +19,6 @@ export class MasterService {
   private masterMenuRepository: MasterMenuRepository;
   @InjectRepository(MasterMediaRepository)
   private masterMediaRepository: MasterMediaRepository;
-  @InjectRepository(MasterCabangRepository)
-  private masterCabangRepository: MasterCabangRepository;
-  @InjectRepository(AttendanceStatusRepository)
-  private attendanceStatusRepository: AttendanceStatusRepository;
-  @InjectRepository(EmployeePermitQuotaRepository)
-  private employeePermitQuotaRepository: EmployeePermitQuotaRepository;
-  @InjectRepository(UserEmployeeRepository)
-  private userEmployeeRepository: UserEmployeeRepository;
-  @InjectRepository(MasterPermissionCategoryRepository)
-  private masterPermissionCategoryRepository: MasterPermissionCategoryRepository;
-
-  async listCabang() {
-    const cabang = await this.masterCabangRepository.find({
-      where: { status: 1 },
-      select: ['name', 'id'],
-      order: { sort: 'ASC' }
-    });
-    return cabang;
-  }
-
-  async attendanceStatus() {
-    const attendanceStatus = await this.attendanceStatusRepository
-      .createQueryBuilder('attendanceStatus')
-      .select('attendanceStatus.uniqueId', 'id')
-      .addSelect('attendanceStatus.description', 'description')
-      .where('attendanceStatus.status = 1')
-      .getRawMany();
-    return attendanceStatus;
-  }
-
-  async permitQuota(userId: number) {
-    const employee = await this.userEmployeeRepository.findOne({
-      where: { userId },
-      select: ['id']
-    });
-    if (!employee) {
-      throw new BadRequestException('user is not employee');
-    }
-    const currentYear = new Date().getFullYear();
-    const data = await this.employeePermitQuotaRepository
-      .createQueryBuilder('employeePermitQuota')
-      .where('employeePermitQuota.employeeId = :employeeId AND employeePermitQuota.year = :year', {
-        employeeId: employee.id,
-        year: `${currentYear}`
-      })
-      .innerJoinAndSelect('employeePermitQuota.masterPermitType', 'masterPermitType')
-      .select('masterPermitType.name', 'name')
-      .addSelect('employeePermitQuota.quota', 'quota')
-      .addSelect('masterPermitType.id', 'id')
-      .orderBy('masterPermitType.sort', 'ASC')
-      .getRawMany();
-    return data;
-  }
 
   async listMenu(accessId: number) {
     let menu = [];
@@ -117,14 +58,6 @@ export class MasterService {
       await this.cacheService.set(cacheKey, JSON.stringify(menu), menu?.length < 1 ? 1 : 3600);
     }
     return menu;
-  }
-
-  async permissionCategory() {
-    const permissionCategory = await this.masterPermissionCategoryRepository
-      .createQueryBuilder('masterPermissionCategory')
-      .select(['masterPermissionCategory.id', 'masterPermissionCategory.name', 'masterPermissionCategory.code'])
-      .getMany();
-    return permissionCategory;
   }
 
   async script(): Promise<MasterScriptDTO> {

@@ -48,15 +48,6 @@ export class LoginDTO {
   device: DeviceDto;
 }
 
-export class DocumentDTO {
-  @ApiProperty()
-  id: number;
-  @ApiProperty()
-  file: string;
-  @ApiProperty()
-  name: string;
-}
-
 export class ReqOtpDTO {
   @ApiProperty()
   email: string;
@@ -67,26 +58,4 @@ export class ValidateOtpDTO {
   email: string;
   @ApiProperty()
   otp: string;
-}
-
-export class ReviewTenderDTO {
-  @ApiProperty()
-  status: number;
-  @ApiProperty()
-  tenderSubmissionId: string;
-  @ApiProperty()
-  reasonId: number;
-  @ApiProperty({ required: false })
-  notes: string;
-  @ApiProperty({ required: false })
-  documentReview: string;
-}
-
-export class ReviewTenderSubmissionDTO {
-  @ApiProperty()
-  status: number;
-  @ApiProperty()
-  tenderSubmissionId: string;
-  @ApiProperty({ required: false })
-  notes: string;
 }

@@ -16,9 +16,4 @@ export class AuthController {
   async login(@Body(LoginPipe) param: LoginDTO) {
     return this.authService.login(param);
   }
-
-  // @Post("/forgot-pass")
-  // forgotPassword(@Body(ReqOtpPipe) param:ReqOtpDTO){
-  //   // return this.authService.forgotPassword(param)
-  // }
 }

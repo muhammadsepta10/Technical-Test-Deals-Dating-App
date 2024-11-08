@@ -9,7 +9,6 @@ import { MasterAccessDbModule } from 'src/db/project-db/entity/master-access/mas
 import { UserAccessDbModule } from 'src/db/project-db/entity/user-access/user-access.module';
 import { MasterAppDbModule } from 'src/db/project-db/entity/master-app/master-app.module';
 import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
-import { UserEmployeeModule } from 'src/db/project-db/entity/user-employee/user-employee.module';
 
 @Module({
   imports: [
@@ -20,8 +19,7 @@ import { UserEmployeeModule } from 'src/db/project-db/entity/user-employee/user-
     MasterAccessDbModule,
     UserAccessDbModule,
     MasterAppDbModule,
-    ProjectDbConfigModule,
-    UserEmployeeModule
+    ProjectDbConfigModule
   ],
   controllers: [UserController],
   providers: [UserService],
