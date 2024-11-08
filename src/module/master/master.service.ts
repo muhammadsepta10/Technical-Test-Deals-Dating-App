@@ -6,8 +6,6 @@ import { MasterScriptRepository } from 'src/db/project-db/entity/master-script/m
 import { CacheService } from 'src/module/cache/cache.service';
 import { MasterMenuRepository } from 'src/db/project-db/entity/master-menu/master-menu.repository';
 import { MasterMediaRepository } from 'src/db/project-db/entity/master-media/master-media.repository';
-import { MasterCabangRepository } from 'src/db/project-db/entity/master-cabang/master-cabang.repository';
-// import { ShiftRepository } from "src/db/project-db/entity/shift/shift.repository";
 
 @Injectable()
 export class MasterService {
@@ -21,17 +19,6 @@ export class MasterService {
   private masterMenuRepository: MasterMenuRepository;
   @InjectRepository(MasterMediaRepository)
   private masterMediaRepository: MasterMediaRepository;
-  @InjectRepository(MasterCabangRepository)
-  private masterCabangRepository: MasterCabangRepository;
-
-  async listCabang() {
-    const cabang = await this.masterCabangRepository.find({
-      where: { status: 1 },
-      select: ['name', 'id'],
-      order: { sort: 'ASC' }
-    });
-    return cabang;
-  }
 
   async listMenu(accessId: number) {
     let menu = [];
