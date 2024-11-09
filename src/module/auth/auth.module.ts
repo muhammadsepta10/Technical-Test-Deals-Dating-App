@@ -9,6 +9,8 @@ import { MasterAppDbModule } from 'src/db/project-db/entity/master-app/master-ap
 import { UserAccessDbModule } from 'src/db/project-db/entity/user-access/user-access.module';
 import { ProjectDbConfigModule } from '@common/config/db/project-db/config.module';
 import { AppConfigModule } from '@common/config/api/config.module';
+import { UserDeviceDbModule } from 'src/db/project-db/entity/user_device/user_device.module';
+import { DeviceDbModule } from 'src/db/project-db/entity/device/device.module';
 
 @Module({
   imports: [
@@ -19,7 +21,9 @@ import { AppConfigModule } from '@common/config/api/config.module';
     MasterAppDbModule,
     UserAccessDbModule,
     ProjectDbConfigModule,
-    AppConfigModule
+    AppConfigModule,
+    UserDeviceDbModule,
+    DeviceDbModule
   ],
   controllers: [AuthController],
   providers: [AuthService],

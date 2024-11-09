@@ -483,6 +483,7 @@ export class CommonService {
   }
 
   private _generateKeyAndIVFromID(id: string): { key: any; iv: any } {
+    console.log('id', id);
     // Use a cryptographic hash function (SHA256 in this case) to create a consistent hash
     const hash = crypto.createHash('sha256').update(id).digest();
     // Slice the hash to get the key and IV of desired lengths

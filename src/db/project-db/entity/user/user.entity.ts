@@ -20,6 +20,15 @@ export class User {
   })
   username: string;
 
+  @Column({
+    default: '',
+    unique: true,
+    type: 'varchar',
+    length: 255,
+    nullable: true
+  })
+  email: string;
+
   @Column({ default: '', type: 'varchar', length: 255, nullable: false })
   photo: string;
 
@@ -30,9 +39,17 @@ export class User {
   name: string;
 
   @Column({
+    default: 0,
+    type: 'smallint',
+    width: 2,
+    comment: '0-> free account, 2-> premium account'
+  })
+  is_premium: number;
+
+  @Column({
     default: 1,
-    type: 'varchar',
-    length: 2,
+    type: 'smallint',
+    width: 2,
     comment: '1-> active, 2-> inactive'
   })
   status: number;

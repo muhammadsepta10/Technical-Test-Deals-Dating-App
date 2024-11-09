@@ -59,3 +59,18 @@ export class ValidateOtpDTO {
   @ApiProperty()
   otp: string;
 }
+
+export class RegisterDTO {
+  @ApiProperty()
+  email: string;
+  @ApiProperty()
+  username: string;
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  password: string;
+  @ApiProperty()
+  photo: string;
+  @ApiProperty({ required: false })
+  device: DeviceDto;
+}

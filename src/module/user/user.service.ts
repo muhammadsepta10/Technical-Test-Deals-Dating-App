@@ -19,13 +19,14 @@ export class UserService {
       .createQueryBuilder('user')
       .innerJoin('user.userAccess', 'ua')
       .innerJoin('ua.masterAccess', 'access')
-      .leftJoin('user.userEmployee', 'userEmployee')
       .select('user.username', 'username')
       .addSelect('user.name', 'name')
       .addSelect('user.photo', 'photo')
       .addSelect('access.description', 'access')
-      .addSelect('userEmployee.uuid', 'employeeId')
       .addSelect('user.uuid', 'id')
+      .addSelect('user.is_premium', 'isPremium')
+      .addSelect('user.status', 'status')
+      .addSelect("(CASE WHEN user.status = 1 THEN 'ACTIVE' ELSE 'INACTIVE' END)", 'statusText')
       .where(`user.id = :userId`, { userId })
       .getRawOne();
     const userProps = Object.keys(user);
@@ -43,12 +44,15 @@ export class UserService {
         if (userValue[0]) {
           userRfct[objName] = {
             ...userRfct[objName],
-            [propName]: userValue?.[index] || ''
+            [propName]: userValue?.[index] || (typeof userValue?.[index] === 'number' ? 0 : '')
           };
         }
       }
       if (!objName) {
-        userRfct = { ...userRfct, [propName]: userValue?.[index] || '' };
+        userRfct = {
+          ...userRfct,
+          [propName]: userValue?.[index] || (typeof userValue?.[index] === 'number' ? 0 : '')
+        };
       }
     }
     return userRfct;
@@ -70,11 +74,9 @@ export class UserService {
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndMapOne('user.userAccess', UserAccess, 'userAccess', '"userAccess"."userId" = user.id')
-      .leftJoin('user.userEmployee', 'userEmployee')
       .innerJoin('userAccess.masterAccess', 'masterAccess')
       .select('user.uuid', 'id')
       .addSelect('user.name', 'name')
-      .addSelect('userEmployee.uuid', 'employeeId')
       .addSelect('user.username', 'email')
       .addSelect('masterAccess.description', 'role')
       .addSelect("(CASE WHEN user.status = '1' THEN 'ACTIVE' ELSE 'INACTIVE' END)", 'status')

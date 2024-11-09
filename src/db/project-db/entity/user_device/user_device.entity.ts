@@ -14,7 +14,7 @@ export class UserDevice {
   @ManyToOne(() => User, user => user.id)
   user: User;
   @Column({ type: 'int', nullable: true, default: null })
-  userId;
+  userId: number;
 
   @ManyToOne(() => Device, device => device.id)
   device: Device;
